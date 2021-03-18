@@ -4,19 +4,21 @@
 void imprimeMatrix(GLfloat** mtx, int N) {
     int i, j;
 
+    printf("\n\n");
+    printf("MATRIX\n\n");
     for (j = 0; j < N; j++)
     {
-        printf("    %d    ", j);
+        printf("      %d      ", j);
     }
 
-    printf("\n");
+    printf("\n\n");
 
     for (i = 0; i < N; i++)
     {   
         printf("%d", i);
         for (j = 0; j < N; j++)
         {
-            printf("    %f    ", mtx[i][j]);
+            printf("    %.2f    ", mtx[i][j]);
         }
         printf("\n");
     }
@@ -25,10 +27,10 @@ void imprimeMatrix(GLfloat** mtx, int N) {
 
 GLfloat** identityMatrix(int N) {
     int i, j;
-    GLfloat **result = (GLfloat **)calloc(N * N, sizeof(GLfloat));
-
+    GLfloat **result = (GLfloat **)calloc(N, sizeof(GLfloat*));
     for (i = 0; i < N; i++)
-    {
+    {   
+        result[i] = (GLfloat *)calloc(N, sizeof(GLfloat));
         for (j = 0; j < N; j++)
         {
             if(i==j){
@@ -43,7 +45,7 @@ GLfloat** identityMatrix(int N) {
 void multiMatrix(GLfloat **m1, GLfloat **m2, int N)
 {
     int i, j, k;
-    GLfloat **result = (GLfloat **)calloc(N * N, sizeof(GLfloat));
+    GLfloat **result = identityMatrix(N);
 
     for (i = 0; i < N; i++)
     {
@@ -55,8 +57,9 @@ void multiMatrix(GLfloat **m1, GLfloat **m2, int N)
             }
         }
     }
-    free(m1);
+    GLfloat **save=m1;
     m1 = result;
+    free(save);
 }
 
 
@@ -68,23 +71,23 @@ void rotateMatrix(GLfloat **m1, GLfloat a, GLfloat b, GLfloat c, int N)
     }
 
     int i, j, k;
-    GLfloat **result = identityMatrix(N);
+    GLfloat **mtx_rotate = identityMatrix(N);
 
     a *= toRad;
     b *= toRad;
     c *= toRad;
 
-    result[0][0] = cos(a) * cos(c) - sin(a) * cos(b) * sin(c);
-    result[0][1] = sin(a) * cos(c) + cos(a) * cos(b) * sin(c);
-    result[0][2] = sin(b) * sin(c);
+    mtx_rotate[0][0] = cos(b) * cos(c);
+    mtx_rotate[0][1] = -(cos(b) * sin(c));
+    mtx_rotate[0][2] = sin(b);
 
-    result[1][0] = -cos(a) * sin(c) - sin(a) * cos(b) * cos(c);
-    result[1][1] = -sin(a) * sin(c) + cos(a) * cos(b) * cos(c);
-    result[1][2] = sin(b) * cos(c);
+    mtx_rotate[1][0] = (sin(a) * sin(b) * cos(c)) + (cos(a) * sin(c)) ;
+    mtx_rotate[1][1] = -(sin(a) * sin(b) * sin(c)) + (cos(a) * cos(c)) ;
+    mtx_rotate[1][2] = -(sin(a) * cos(b));
 
-    result[2][0] = sin(a) * sin(b);
-    result[2][1] = -cos(a) * sin(b);
-    result[2][2] = cos(b);
+    mtx_rotate[2][0] = -(cos(a) * sin(b) * cos(c)) + (sin(a) * sin(c)) ;
+    mtx_rotate[2][1] = (cos(a) * sin(b) * sin(c)) + (sin(a) * cos(c)) ;
+    mtx_rotate[2][2] = cos(a) * cos(b);
 
-    multiMatrix(m1, result, N);
+    multiMatrix(m1, mtx_rotate, N);
 }

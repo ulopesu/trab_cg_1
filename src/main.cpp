@@ -16,8 +16,10 @@
 #define N_MTX 4
 
 bool onDrag = false;
-GLfloat mouseX=0;
-GLfloat mouseY=0;
+GLfloat mouseX = 0;
+GLfloat mouseY = 0;
+int mouseState;
+bool ladoMouse;
 
 int keyStatus[256];
 
@@ -31,55 +33,58 @@ const GLint ViewingHeight = 500;
 bool soco = false;
 Lutador *lutador1 = new Lutador(0, 0, new Cor(0.2, 0.2, 1), 0, 50);
 
+void atualizaLadoMouse()
+{   
+    GLfloat xLut, yLut, dirLut;
+    lutador1->getPosXY(xLut, yLut, dirLut);
+    //printf("xLut: %.2f | yLut: %.2f\n\n", xLut, yLut);
+
+    GLfloat **mtxMouse = identityMatrix(N_MTX);
+
+    //imprimeMatrix(mtxMouse, N_MTX);
+    //printf("\nDIR: %f\n", dirLut);
+
+    mtxMouse[0][0] = (mouseX - xLut) / Width;
+    mtxMouse[0][1] = (mouseY - yLut) / Height;
+
+    //rotateMatrix(mtxMouse, 0,0, dirLut, N_MTX);
+    //imprimeMatrix(mtxMouse, N_MTX);
+    ladoMouse = (mtxMouse[0][0] > 0);
+}
+
 void drag(int _x, int _y)
-{
-    if (onDrag)
-    {   
-        _y = ViewingHeight-_y;
-        GLfloat x = (GLfloat)_x / (GLfloat)ViewingWidth;
-        GLfloat y = (GLfloat)_y / (GLfloat)ViewingHeight;
-        mouseX = x;
-        mouseY = y;
+{   
+    mouseX = (GLfloat)_x - (Width / 2);
+    _y = Height - _y;
+    mouseY = (GLfloat)_y - (Height / 2);
 
-        GLfloat xLut, yLut, dirLut;
-
-        lutador1->getPosXY(xLut, yLut, dirLut);
-
-        GLfloat **mtxMouse = identityMatrix(N_MTX);
-        mtxMouse[0][0]=mouseX-xLut;
-        mtxMouse[0][1]=mouseY-yLut;
-
-        imprimeMatrix(mtxMouse, N_MTX);
-
-        rotateMatrix(mtxMouse, 0,0, dirLut, N_MTX);
-
-        if(mtxMouse[0][0] > 0){
-            lutador1->darSoco(INC_MOUSE_DRAG, 0);
-        } else {
-            lutador1->darSoco(INC_MOUSE_DRAG, 1);
-        }
-
-        glutPostRedisplay();
+    if (!mouseState && ladoMouse)
+    {
+        lutador1->controleSoco(INC_MOUSE_DRAG, DIREITA);
     }
+    else if (!mouseState && !ladoMouse)
+    {
+        lutador1->controleSoco(INC_MOUSE_DRAG, ESQUERDA);
+    }
+    glutPostRedisplay();
 }
 
 void mouse(int button, int state, int _x, int _y)
 {
-    _y = ViewingHeight-_y;
-    GLfloat x = (GLfloat)_x / (GLfloat)ViewingWidth;
-    GLfloat y = (GLfloat)_y / (GLfloat)ViewingHeight;
-    if (!state)
+    mouseX = (GLfloat)_x - (Width / 2);
+    _y = Height - _y;
+    mouseY = (GLfloat)_y - (Height / 2);
+
+    mouseState = state;
+    if (!mouseState && ladoMouse)
     {
-        onDrag = true;
-        mouseX = x;
-        mouseY = y;
+        lutador1->controleSoco(INC_MOUSE_DRAG, DIREITA);
     }
-    else
+    else if (!mouseState && !ladoMouse)
     {
-        onDrag = false;
-        mouseX = x;
-        mouseY = y;
+        lutador1->controleSoco(INC_MOUSE_DRAG, ESQUERDA);
     }
+
     //printf("\nX: %f.Y: %f.", x, y);
     //printf("\nSTATE: %d.", state);
     glutPostRedisplay();
@@ -116,9 +121,6 @@ void keyPress(unsigned char key, int x, int y)
         keyStatus[(int)('s')] = 1;
         break;
     case ' ':
-        if (!soco)
-            lutador1->darSoco(1, 0);
-        lutador1->darSoco(1, 1);
         break;
     case 27:
         free(lutador1);
@@ -147,12 +149,9 @@ void init(void)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glMatrixMode(GL_PROJECTION);
-    glOrtho(-(ViewingWidth / 2),
-            (ViewingWidth / 2),
-            -(ViewingHeight / 2),
-            (ViewingHeight / 2),
-            -100,
-            100);
+    glOrtho(-(ViewingWidth / 2), (ViewingWidth / 2),   //     X
+            -(ViewingHeight / 2), (ViewingHeight / 2), //     Y
+            -100, 100);                                //     Z
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -177,25 +176,12 @@ void idle(void)
     {
         lutador1->Move(-inc, 0);
     }
-
-    if (soco)
+    atualizaLadoMouse();
+    if (mouseState)
     {
-        /*
-        tiro->Move();
-
-        if (alvo.Atingido(tiro))
-        {
-            alvo.Recria(rand() % 500 - 250, 200);
-        }
-
-        if (!tiro->Valido())
-        {
-            delete tiro;
-            tiro = NULL;
-        }
-        */
+        lutador1->controleSoco(-INC_MOUSE_DRAG, TODOS);
     }
-
+    lutador1->darSoco();
     glutPostRedisplay();
 }
 
