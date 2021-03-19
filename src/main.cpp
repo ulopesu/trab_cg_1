@@ -10,9 +10,6 @@
 #define INC_KEY 2
 #define INC_KEYIDLE 1
 
-#define INC_MOUSE 2
-#define INC_MOUSE_DRAG 1
-
 #define N_MTX 4
 
 bool onDrag = false;
@@ -28,12 +25,9 @@ int keyStatus[256];
 const GLint Width = 700;
 const GLint Height = 700;
 
-const GLint ViewingWidth = 500;
-const GLint ViewingHeight = 500;
-
 //Componentes do mundo virtual sendo modelado
 bool soco = false;
-Lutador *lutador1 = new Lutador(0, 0, new Cor(0.2, 0.2, 1), 0, 50);
+Lutador *lutador1 = new Lutador(0, 0, new Cor(0.2, 0.2, 1), 0, 50, Width, Height);
 
 void atualizaLadoMouse()
 {   
@@ -142,8 +136,8 @@ void init(void)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glMatrixMode(GL_PROJECTION);
-    glOrtho(-(ViewingWidth / 2), (ViewingWidth / 2),   //     X
-            -(ViewingHeight / 2), (ViewingHeight / 2), //     Y
+    glOrtho(-(Width / 2), (Width / 2),   //     X
+            -(Height / 2), (Height / 2), //     Y
             -100, 100);                                //     Z
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -168,6 +162,10 @@ void idle(void)
     if (keyStatus[(int)('s')])
     {
         lutador1->Move(-inc, 0);
+    }
+    if(mouseState){
+        lutador1->controleSoco(1, TODOS);
+        lutador1->darSoco();
     }
     glutPostRedisplay();
 }

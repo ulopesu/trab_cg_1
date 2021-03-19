@@ -23,11 +23,16 @@ enum LadoSoco
 #define LIM_SUP_THETA_1 85
 #define LIM_SUP_THETA_2 15
 
-#define VEL_MOVE 1
-#define VEL_SOCO 2/350
+#define VEL_MOVE 5
+#define VEL_GIRO 2
+#define VEL_DAR_SOCO 2/350
+#define VEL_VOLTAR_SOCO 10
 
 class Lutador
-{
+{   
+    int TAM_ARENA_X;
+    int TAM_ARENA_Y;
+
     GLfloat gX;
     GLfloat gY;
 
@@ -52,8 +57,10 @@ class Lutador
     GLfloat gdSoco;
 
 private:
-    void darSocoDireita();
-    void darSocoEsquerda();
+    bool colisaoX(GLfloat dXY);
+    bool colisaoY(GLfloat dXY);
+    void darSocoRL(GLfloat dSoco);
+    void voltarSoco(GLfloat dSoco);
     void DesenhaBraco(GLfloat x, GLfloat y, GLfloat theta1, GLfloat theta2,
                       GLfloat tamBracos, GLfloat rLuvas);
 
@@ -69,7 +76,8 @@ private:
                         GLfloat tBracos, GLfloat rLvs, GLfloat rClsao);
 
 public:
-    Lutador(GLfloat _gX, GLfloat _gY, Cor *_cor, GLfloat _theta, GLfloat _tam);
+    Lutador(    GLfloat _gX, GLfloat _gY, Cor *_cor, 
+                GLfloat _theta, GLfloat _tam, int TA_X, int TA_Y);
     void Desenha()
     {
         DesenhaLutador(gX, gY, cor, gTheta,
