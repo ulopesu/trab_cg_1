@@ -42,7 +42,7 @@ GLfloat** identityMatrix(int N) {
 }
 
 
-void multiMatrix(GLfloat **m1, GLfloat **m2, int N)
+GLfloat** multiMatrix(GLfloat **m1, GLfloat **m2, int N)
 {
     int i, j, k;
     GLfloat **result = identityMatrix(N);
@@ -57,17 +57,15 @@ void multiMatrix(GLfloat **m1, GLfloat **m2, int N)
             }
         }
     }
-    GLfloat **save=m1;
-    m1 = result;
-    free(save);
+    return  result;
 }
 
 
-void rotateMatrix(GLfloat **m1, GLfloat a, GLfloat b, GLfloat c, int N)
+GLfloat** rotateMatrix(GLfloat **m1, GLfloat a, GLfloat b, GLfloat c, int N)
 {
     if (N < 3)
     {
-        return;
+        return m1;
     }
 
     int i, j, k;
@@ -89,5 +87,5 @@ void rotateMatrix(GLfloat **m1, GLfloat a, GLfloat b, GLfloat c, int N)
     mtx_rotate[2][1] = (cos(a) * sin(b) * sin(c)) + (sin(a) * cos(c)) ;
     mtx_rotate[2][2] = cos(a) * cos(b);
 
-    multiMatrix(m1, mtx_rotate, N);
+    return multiMatrix(m1, mtx_rotate, N);
 }

@@ -16,6 +16,8 @@
 #define N_MTX 4
 
 bool onDrag = false;
+GLfloat mouseINIT_X = 0;
+GLfloat mouseINIT_Y = 0;
 GLfloat mouseX = 0;
 GLfloat mouseY = 0;
 int mouseState;
@@ -37,19 +39,7 @@ void atualizaLadoMouse()
 {   
     GLfloat xLut, yLut, dirLut;
     lutador1->getPosXY(xLut, yLut, dirLut);
-    //printf("xLut: %.2f | yLut: %.2f\n\n", xLut, yLut);
-
-    GLfloat **mtxMouse = identityMatrix(N_MTX);
-
-    //imprimeMatrix(mtxMouse, N_MTX);
-    //printf("\nDIR: %f\n", dirLut);
-
-    mtxMouse[0][0] = (mouseX - xLut) / Width;
-    mtxMouse[0][1] = (mouseY - yLut) / Height;
-
-    //rotateMatrix(mtxMouse, 0,0, dirLut, N_MTX);
-    //imprimeMatrix(mtxMouse, N_MTX);
-    ladoMouse = (mtxMouse[0][0] > 0);
+    ladoMouse = (mouseX > 0);
 }
 
 void drag(int _x, int _y)
@@ -57,15 +47,17 @@ void drag(int _x, int _y)
     mouseX = (GLfloat)_x - (Width / 2);
     _y = Height - _y;
     mouseY = (GLfloat)_y - (Height / 2);
+    atualizaLadoMouse();
 
     if (!mouseState && ladoMouse)
-    {
-        lutador1->controleSoco(INC_MOUSE_DRAG, DIREITA);
+    {   
+        lutador1->controleSoco(mouseX, DIREITA);
     }
     else if (!mouseState && !ladoMouse)
     {
-        lutador1->controleSoco(INC_MOUSE_DRAG, ESQUERDA);
+        lutador1->controleSoco(-mouseX, ESQUERDA);
     }
+    lutador1->darSoco();
     glutPostRedisplay();
 }
 
@@ -76,13 +68,14 @@ void mouse(int button, int state, int _x, int _y)
     mouseY = (GLfloat)_y - (Height / 2);
 
     mouseState = state;
+    atualizaLadoMouse();
     if (!mouseState && ladoMouse)
-    {
-        lutador1->controleSoco(INC_MOUSE_DRAG, DIREITA);
+    {   
+        lutador1->controleSoco(mouseX/Width, DIREITA);
     }
     else if (!mouseState && !ladoMouse)
     {
-        lutador1->controleSoco(INC_MOUSE_DRAG, ESQUERDA);
+        lutador1->controleSoco(-mouseX/Width, ESQUERDA);
     }
 
     //printf("\nX: %f.Y: %f.", x, y);
@@ -176,12 +169,6 @@ void idle(void)
     {
         lutador1->Move(-inc, 0);
     }
-    atualizaLadoMouse();
-    if (mouseState)
-    {
-        lutador1->controleSoco(-INC_MOUSE_DRAG, TODOS);
-    }
-    lutador1->darSoco();
     glutPostRedisplay();
 }
 

@@ -113,6 +113,10 @@ void Lutador::Move(GLfloat dY, GLfloat dTheta)
     else
     {
         gTheta += dTheta;
+
+        if(gTheta>360 || gTheta<-360){
+            gTheta =  fmod(gTheta,360);
+        }
     }
 
     //printf("GX: %.2f GY: %.2f\n", cos(dTheta), sin(dTheta));
@@ -136,77 +140,45 @@ void Lutador::controleSoco(GLfloat dSoco, LadoSoco ladoSoco)
 void Lutador::darSocoDireita(){
     GLfloat dSoco = gdSoco*VEL_SOCO;
 
-    //DECREMENTO ESQUERDA
+    GLfloat p1 = ((LIM_SUP_THETA_1-LIM_INF_THETA_1)*dSoco)+LIM_INF_THETA_1;
+    GLfloat p2 = ((LIM_INF_THETA_2-LIM_SUP_THETA_2)*dSoco);
+    p2*=(-1);
+    p2+=LIM_INF_THETA_2;
 
-    if(dSoco>0){
-        if ((gTheta1_L-dSoco) > LIM_INF_THETA_1 && (gTheta1_L-dSoco) < LIM_SUP_THETA_1)
-        {
-            gTheta1_L -= dSoco;
-        }
-
-        dSoco*=(-1);
-
-        if ((gTheta2_L-dSoco) < LIM_INF_THETA_2 && (gTheta2_L-dSoco) > LIM_SUP_THETA_2)
-        {
-            gTheta2_L -= dSoco;
-        }
-        dSoco*=(-1);
+    if (p1 > LIM_INF_THETA_1 && p1 < LIM_SUP_THETA_1)
+    {
+        gTheta1_R = p1;
     }
 
-    //INCREMENTO DIREITA
-
-    if ((gTheta1_R+dSoco) > LIM_INF_THETA_1 && (gTheta1_R+dSoco) < LIM_SUP_THETA_1)
+    if (p2 > LIM_SUP_THETA_2 && p2 < LIM_INF_THETA_2)
     {
-        gTheta1_R += dSoco;
-    }
-
-    dSoco*=(-1);
-
-    if ((gTheta2_R+dSoco) < LIM_INF_THETA_2 && (gTheta2_R+dSoco) > LIM_SUP_THETA_2)
-    {
-        gTheta2_R += dSoco;
+        gTheta2_R = p2;
     }
 }
 
 void Lutador::darSocoEsquerda(){
     GLfloat dSoco = gdSoco*VEL_SOCO;
 
-    //DECREMENTO DIREITA
+    GLfloat p1 = ((LIM_SUP_THETA_1-LIM_INF_THETA_1)*dSoco)+LIM_INF_THETA_1;
 
-    if(dSoco>0){
-        if ((gTheta1_R-dSoco) > LIM_INF_THETA_1 && (gTheta1_R-dSoco) < LIM_SUP_THETA_1)
-        {
-            gTheta1_R -= dSoco;
-        }
+    GLfloat p2 = ((LIM_INF_THETA_2-LIM_SUP_THETA_2)*dSoco);
+    p2*=(-1);
+    p2+=LIM_INF_THETA_2;
 
-        dSoco*=(-1);
+    printf("\n\nP1: %f      P2: %f\n\n", p1, p2);
 
-        if ((gTheta2_R-dSoco) < LIM_INF_THETA_2 && (gTheta2_R-dSoco) > LIM_SUP_THETA_2)
-        {
-            gTheta2_R -= dSoco;
-        }
-
-        dSoco*=(-1);
+    if (p1 > LIM_INF_THETA_1 && p1 < LIM_SUP_THETA_1)
+    {
+        gTheta1_L = p1;
     }
 
-    // INCREMENTO ESQUERDA
-
-    if ((gTheta1_L+dSoco) > LIM_INF_THETA_1 && (gTheta1_L+dSoco) < LIM_SUP_THETA_1)
+    if (p2 > LIM_SUP_THETA_2 && p2 < LIM_INF_THETA_2)
     {
-        gTheta1_L += dSoco;
-    }
-
-    dSoco*=(-1);
-
-    if ((gTheta2_L+dSoco) < LIM_INF_THETA_2 && (gTheta2_L+dSoco) > LIM_SUP_THETA_2)
-    {
-        gTheta2_L += dSoco;
+        gTheta2_L = p2;
     }
 }
 
 void Lutador::darSoco(){
-    GLfloat dSoco = gdSoco*VEL_SOCO;
-    int finalSoco=0;
 
     if (!gSocoStatus){
         return;

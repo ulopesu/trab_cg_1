@@ -24,7 +24,7 @@ enum LadoSoco
 #define LIM_SUP_THETA_2 15
 
 #define VEL_MOVE 1
-#define VEL_SOCO 10
+#define VEL_SOCO 2/350
 
 class Lutador
 {
