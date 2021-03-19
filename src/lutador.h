@@ -15,6 +15,8 @@ enum LadoSoco
     TODOS,
 };
 
+#define N_MTX 4
+
 #define toRad (M_PI / 180)
 
 #define LIM_INF_THETA_1 -50
@@ -56,7 +58,13 @@ class Lutador
     LadoSoco gLadoSoco;
     GLfloat gdSoco;
 
+    Lutador* gOponente;
+
 private:
+    bool colisaoLut(GLfloat dXY);
+
+    bool colisaoTelaX(GLfloat dXY);
+    bool colisaoTelaY(GLfloat dXY);
     bool colisaoX(GLfloat dXY);
     bool colisaoY(GLfloat dXY);
     void darSocoRL(GLfloat dSoco);
@@ -86,7 +94,7 @@ public:
                        rCabeca, tamBracos,
                        rLuvas, rColisao);
     };
-    void Move(GLfloat dY, GLfloat dTheta);
+    void Move(GLfloat dY, GLfloat dTheta, Lutador* oponente);
     void controleSoco(GLfloat dSoco, LadoSoco ladoSoco);
 
     void getPosXY(GLfloat &x, GLfloat &y, GLfloat &dir)

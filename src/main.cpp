@@ -27,7 +27,9 @@ const GLint Height = 700;
 
 //Componentes do mundo virtual sendo modelado
 bool soco = false;
-Lutador *lutador1 = new Lutador(0, 0, new Cor(0.2, 0.2, 1), 0, 50, Width, Height);
+Lutador *lutador1 = new Lutador(-200, 0, new Cor(0.2, 0.2, 1), 0, 50, Width, Height);
+Lutador *lutador2 = new Lutador(200, 0, new Cor(1, 0.2, 0.2), 0, 50, Width, Height);
+
 
 void atualizaLadoMouse()
 {   
@@ -83,7 +85,7 @@ void renderScene(void)
     glClear(GL_COLOR_BUFFER_BIT);
 
     lutador1->Desenha();
-
+    lutador2->Desenha();
     glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
@@ -149,19 +151,19 @@ void idle(void)
 
     if (keyStatus[(int)('a')])
     {
-        lutador1->Move(0, inc);
+        lutador1->Move(0, inc, lutador2);
     }
     if (keyStatus[(int)('d')])
     {
-        lutador1->Move(0, -inc);
+        lutador1->Move(0, -inc, lutador2);
     }
     if (keyStatus[(int)('w')])
     {
-        lutador1->Move(inc, 0);
+        lutador1->Move(inc, 0, lutador2);
     }
     if (keyStatus[(int)('s')])
     {
-        lutador1->Move(-inc, 0);
+        lutador1->Move(-inc, 0, lutador2);
     }
     if(mouseState){
         lutador1->controleSoco(1, TODOS);
