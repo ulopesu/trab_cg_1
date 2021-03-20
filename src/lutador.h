@@ -61,9 +61,15 @@ class Lutador
     Lutador* gOponente;
     int gPontos;
 
+    GLfloat gTheta1_R_Ant;
+    GLfloat gdiffTheta1_R;
+
+    GLfloat gTheta1_L_Ant;
+    GLfloat gdiffTheta1_L;
+    
 private:
-    bool acertoR();
-    bool acertoL();
+    void getPosLuvaR(GLfloat &xL,GLfloat &yL);
+    void getPosLuvaL(GLfloat &xL,GLfloat &yL);
     bool colisaoLut(GLfloat dXY);
     bool colisaoTelaX(GLfloat dXY);
     bool colisaoTelaY(GLfloat dXY);
@@ -126,6 +132,9 @@ public:
     }
 
     bool acerto();
+
+    void getPosNariz(GLfloat &xL,GLfloat &yL);
+
 };
 
 #endif /* LUTADOR_H */

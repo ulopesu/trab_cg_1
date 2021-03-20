@@ -35,6 +35,8 @@ Lutador::Lutador(GLfloat _gX, GLfloat _gY, Cor *_cor,
     // PRESET DE SOCO
     gSocoStatus = false;
     gLadoSoco = DIREITA;
+    gTheta1_R_Ant = LIM_INF_THETA_1;
+    gTheta1_L_Ant = LIM_INF_THETA_1;
     gdSoco = 0;
     gPontos = 0;
 };
@@ -105,6 +107,10 @@ void Lutador::DesenhaLutador(GLfloat x, GLfloat y, Cor *cor, GLfloat theta,
     DesenhaCabeca(0, 0, cor, rCabeca);
 
     glPopMatrix();
+    gdiffTheta1_R = gTheta1_R_Ant - gTheta1_R;
+    gdiffTheta1_L = gTheta1_L_Ant - gTheta1_L;
+    gTheta1_R_Ant = gTheta1_R;
+    gTheta1_L_Ant = gTheta1_L;
 }
 
 bool Lutador::colisaoTelaX(GLfloat dXY)
@@ -276,7 +282,7 @@ void Lutador::darSoco()
     }
 }
 
-bool Lutador::acertoR()
+void Lutador::getPosLuvaR(GLfloat &xL, GLfloat &yL)
 {
     GLfloat **mtx_lut = identityMatrix(N_MTX);
     GLfloat **aux, aux2;
@@ -296,14 +302,14 @@ bool Lutador::acertoR()
     mtx_lut = rotateMatrix(mtx_lut, 0, 0, -gTheta, N_MTX);
     mtx_lut = translateMatrix(mtx_lut, gX, gY, 0, N_MTX);
 
-    GLfloat xOp, yOp, dirOp;
-    gOponente->getPosXY(xOp, yOp, dirOp);
-    GLfloat dt = dist(mtx_lut[0][0], mtx_lut[0][1], xOp, yOp);
-    //printf("\ndT: %f\nRAIOS: %f\n",dt, (rLuvas+rCabeca));
-    return (dt < rLuvas + rCabeca) ? true : false;
+    xL = mtx_lut[0][0];
+    yL = mtx_lut[0][1];
+
+    //Circulo *circ = new Circulo(rLuvas, 100, mtx_lut[0][0], mtx_lut[0][1]);
+    //circ->desenhaCompleto(new Cor(0,1,1));
 }
 
-bool Lutador::acertoL()
+void Lutador::getPosLuvaL(GLfloat &xL, GLfloat &yL)
 {
     GLfloat **mtx_lut = identityMatrix(N_MTX);
     GLfloat **aux, aux2;
@@ -311,28 +317,73 @@ bool Lutador::acertoL()
     mtx_lut = translateMatrix(mtx_lut, -rCabeca, 0, 0, N_MTX);
 
     aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
-    aux = rotateMatrix(aux, 0, 0, gTheta1_L-90, N_MTX);
+    aux = rotateMatrix(aux, 0, 0, gTheta1_L - 90, N_MTX);
 
     mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
 
     aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
-    aux = rotateMatrix(aux, 0, 0, -93+gTheta1_L +gTheta2_L, N_MTX);
+    aux = rotateMatrix(aux, 0, 0, -93 + gTheta1_L + gTheta2_L, N_MTX);
 
     mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
 
     mtx_lut = rotateMatrix(mtx_lut, 0, 0, -gTheta, N_MTX);
     mtx_lut = translateMatrix(mtx_lut, gX, gY, 0, N_MTX);
+
+    xL = mtx_lut[0][0];
+    yL = mtx_lut[0][1];
+
     //Circulo *circ = new Circulo(rLuvas, 100, mtx_lut[0][0], mtx_lut[0][1]);
     //circ->desenhaCompleto(new Cor(0,1,1));
+}
 
-    GLfloat xOp, yOp, dirOp;
-    gOponente->getPosXY(xOp, yOp, dirOp);
-    GLfloat dt = dist(mtx_lut[0][0], mtx_lut[0][1], xOp, yOp);
-    //printf("\ndT: %f\nRAIOS: %f\n", dt, (rLuvas + rCabeca));
-    return (dt < rLuvas + rCabeca) ? true : false;
+void Lutador::getPosNariz(GLfloat &xL, GLfloat &yL)
+{
+    GLfloat **mtx = translateMatrix(identityMatrix(N_MTX), 0, rCabeca, 0, N_MTX);
+    mtx = rotateMatrix(mtx, 0, 0, -gTheta, N_MTX);
+    xL = mtx[0][0] + gX;
+    yL = mtx[0][1] + gY;
+
+    //Circulo *circ = new Circulo(rLuvas, 100, xL, yL);
+    //circ->desenhaCompleto(new Cor(0,1,1));
 }
 
 bool Lutador::acerto()
 {
-    return acertoR() || acertoL();
+    GLfloat xOp, yOp, dirOp, xLuva, yLuva;
+    gOponente->getPosXY(xOp, yOp, dirOp);
+
+    // LUVA DIREITA
+    getPosLuvaR(xLuva, yLuva);
+    GLfloat dtR = dist(xLuva, yLuva, xOp, yOp);
+
+    // LUVA ESQUERDA
+    getPosLuvaL(xLuva, yLuva);
+    GLfloat dtL = dist(xLuva, yLuva, xOp, yOp);
+
+    //printf("\n gdiffTheta1_R: %f \n gdiffTheta1_L: %f\n", gdiffTheta1_R, gdiffTheta1_L);
+
+    bool acertoCab = (((dtR < rLuvas + rCabeca) && gdiffTheta1_R < 0) ||
+                      ((dtL < rLuvas + rCabeca) && gdiffTheta1_L < 0))
+                         ? true
+                         : false;
+
+    // NARIZ OPONENTE
+    gOponente->getPosNariz(xOp, yOp);
+
+    // LUVA DIREITA NARIZ
+    getPosLuvaR(xLuva, yLuva);
+    dtR = dist(xLuva, yLuva, xOp, yOp);
+
+    // LUVA ESQUERDA NARIZ
+    getPosLuvaL(xLuva, yLuva);
+    dtL = dist(xLuva, yLuva, xOp, yOp);
+
+    //printf("\ndT: %f\nRAIOS: %f\n", dt, (rLuvas + rCabeca));
+
+    bool acertoNariz = (((dtR < rLuvas + rNariz) && gdiffTheta1_R < 0) ||
+                        ((dtL < rLuvas + rNariz) && gdiffTheta1_L < 0))
+                           ? true
+                           : false;
+
+    return acertoCab || acertoNariz;
 }
