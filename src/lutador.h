@@ -59,10 +59,12 @@ class Lutador
     GLfloat gdSoco;
 
     Lutador* gOponente;
+    int gPontos;
 
 private:
+    bool acertoR();
+    bool acertoL();
     bool colisaoLut(GLfloat dXY);
-
     bool colisaoTelaX(GLfloat dXY);
     bool colisaoTelaY(GLfloat dXY);
     bool colisaoX(GLfloat dXY);
@@ -86,6 +88,19 @@ private:
 public:
     Lutador(    GLfloat _gX, GLfloat _gY, Cor *_cor, 
                 GLfloat _theta, GLfloat _tam, int TA_X, int TA_Y);
+
+    void setOponente(Lutador* Op){
+        gOponente = Op;
+    }
+
+    void addPontos(int pontos){
+        gPontos+=pontos;
+    }
+
+    void getPontos(int &pontos){
+        pontos = gPontos;
+    }
+
     void Desenha()
     {
         DesenhaLutador(gX, gY, cor, gTheta,
@@ -94,7 +109,8 @@ public:
                        rCabeca, tamBracos,
                        rLuvas, rColisao);
     };
-    void Move(GLfloat dY, GLfloat dTheta, Lutador* oponente);
+    void darSoco();
+    void Move(GLfloat dY, GLfloat dTheta);
     void controleSoco(GLfloat dSoco, LadoSoco ladoSoco);
 
     void getPosXY(GLfloat &x, GLfloat &y, GLfloat &dir)
@@ -108,7 +124,8 @@ public:
     {
         return gSocoStatus;
     }
-    void darSoco();
+
+    bool acerto();
 };
 
 #endif /* LUTADOR_H */

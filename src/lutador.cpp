@@ -36,9 +36,11 @@ Lutador::Lutador(GLfloat _gX, GLfloat _gY, Cor *_cor,
     gSocoStatus = false;
     gLadoSoco = DIREITA;
     gdSoco = 0;
+    gPontos = 0;
 };
 
-void Lutador::DesenhaBraco(GLfloat x, GLfloat y, GLfloat theta1, GLfloat theta2, GLfloat tamBracos, GLfloat rLuvas)
+void Lutador::DesenhaBraco(GLfloat x, GLfloat y, GLfloat theta1, GLfloat theta2,
+                           GLfloat tamBracos, GLfloat rLuvas)
 {
     Cor *cor = new Cor(0.2, 1, 0.2);
     glPushMatrix();
@@ -135,20 +137,19 @@ bool Lutador::colisaoTelaY(GLfloat dXY)
 }
 
 bool Lutador::colisaoLut(GLfloat dXY)
-{   
+{
     GLfloat dX = -dXY * sin(gTheta * toRad);
     GLfloat dY = dXY * cos(gTheta * toRad);
     GLfloat xOp, yOp, dirOp;
     gOponente->getPosXY(xOp, yOp, dirOp);
 
-    dX = gX+dX-xOp;
-    dY = gY+dY-yOp;
+    dX = gX + dX - xOp;
+    dY = gY + dY - yOp;
 
-    GLfloat dist = sqrt(pow(dX,2)+pow(dY,2));
+    GLfloat dist = sqrt(pow(dX, 2) + pow(dY, 2));
 
-    return dist <= (rColisao+rCabeca) ? true : false;
+    return dist <= (rColisao + rCabeca) ? true : false;
 }
-
 
 bool Lutador::colisaoX(GLfloat dXY)
 {
@@ -160,10 +161,9 @@ bool Lutador::colisaoY(GLfloat dXY)
     return colisaoTelaY(dXY);
 }
 
-void Lutador::Move(GLfloat dXY, GLfloat dTheta, Lutador *Op)
+void Lutador::Move(GLfloat dXY, GLfloat dTheta)
 {
     //GLfloat toRad = M_PI / 180;
-    gOponente = Op;
     dXY *= VEL_MOVE;
     dTheta *= VEL_GIRO;
     gTheta += dTheta;
@@ -194,16 +194,6 @@ void Lutador::Move(GLfloat dXY, GLfloat dTheta, Lutador *Op)
 void Lutador::controleSoco(GLfloat dSoco, LadoSoco ladoSoco)
 {
     gdSoco = dSoco;
-
-    if (dSoco != 0)
-    {
-        gSocoStatus = true;
-    }
-    else
-    {
-        gSocoStatus = false;
-        return;
-    }
 
     gLadoSoco = ladoSoco;
 }
@@ -271,21 +261,78 @@ void Lutador::voltarSoco(GLfloat dSoco)
 
 void Lutador::darSoco()
 {
-
-    if (!gSocoStatus)
-    {
-        return;
-    }
-
     GLfloat theta1, theta2;
     switch (gLadoSoco)
     {
     case TODOS:
+        gSocoStatus = false;
         voltarSoco(gdSoco * VEL_VOLTAR_SOCO);
         break;
 
     default:
+        gSocoStatus = true;
         darSocoRL(gdSoco * VEL_DAR_SOCO);
         break;
     }
+}
+
+bool Lutador::acertoR()
+{
+    GLfloat **mtx_lut = identityMatrix(N_MTX);
+    GLfloat **aux, aux2;
+
+    mtx_lut = translateMatrix(mtx_lut, rCabeca, 0, 0, N_MTX);
+
+    aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
+    aux = rotateMatrix(aux, 0, 0, 90 - gTheta1_R, N_MTX);
+
+    mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
+
+    aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
+    aux = rotateMatrix(aux, 0, 0, 87 - gTheta1_R - gTheta2_R, N_MTX);
+
+    mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
+
+    mtx_lut = rotateMatrix(mtx_lut, 0, 0, -gTheta, N_MTX);
+    mtx_lut = translateMatrix(mtx_lut, gX, gY, 0, N_MTX);
+
+    GLfloat xOp, yOp, dirOp;
+    gOponente->getPosXY(xOp, yOp, dirOp);
+    GLfloat dt = dist(mtx_lut[0][0], mtx_lut[0][1], xOp, yOp);
+    //printf("\ndT: %f\nRAIOS: %f\n",dt, (rLuvas+rCabeca));
+    return (dt < rLuvas + rCabeca) ? true : false;
+}
+
+bool Lutador::acertoL()
+{
+    GLfloat **mtx_lut = identityMatrix(N_MTX);
+    GLfloat **aux, aux2;
+
+    mtx_lut = translateMatrix(mtx_lut, -rCabeca, 0, 0, N_MTX);
+
+    aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
+    aux = rotateMatrix(aux, 0, 0, gTheta1_L-90, N_MTX);
+
+    mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
+
+    aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
+    aux = rotateMatrix(aux, 0, 0, -93+gTheta1_L +gTheta2_L, N_MTX);
+
+    mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
+
+    mtx_lut = rotateMatrix(mtx_lut, 0, 0, -gTheta, N_MTX);
+    mtx_lut = translateMatrix(mtx_lut, gX, gY, 0, N_MTX);
+    //Circulo *circ = new Circulo(rLuvas, 100, mtx_lut[0][0], mtx_lut[0][1]);
+    //circ->desenhaCompleto(new Cor(0,1,1));
+
+    GLfloat xOp, yOp, dirOp;
+    gOponente->getPosXY(xOp, yOp, dirOp);
+    GLfloat dt = dist(mtx_lut[0][0], mtx_lut[0][1], xOp, yOp);
+    //printf("\ndT: %f\nRAIOS: %f\n", dt, (rLuvas + rCabeca));
+    return (dt < rLuvas + rCabeca) ? true : false;
+}
+
+bool Lutador::acerto()
+{
+    return acertoR() || acertoL();
 }

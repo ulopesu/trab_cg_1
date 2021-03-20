@@ -30,7 +30,6 @@ bool soco = false;
 Lutador *lutador1 = new Lutador(-200, 0, new Cor(0.2, 0.2, 1), 0, 50, Width, Height);
 Lutador *lutador2 = new Lutador(200, 0, new Cor(1, 0.2, 0.2), 0, 50, Width, Height);
 
-
 void atualizaLadoMouse()
 {   
     GLfloat xLut, yLut, dirLut;
@@ -58,7 +57,7 @@ void drag(int _x, int _y)
 }
 
 void mouse(int button, int state, int _x, int _y)
-{
+{   
     mouseX = (GLfloat)_x - (Width / 2);
     _y = Height - _y;
     mouseY = (GLfloat)_y - (Height / 2);
@@ -86,6 +85,7 @@ void renderScene(void)
 
     lutador1->Desenha();
     lutador2->Desenha();
+    //lutador1->acerto();
     glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
@@ -143,6 +143,9 @@ void init(void)
             -100, 100);                                //     Z
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    lutador1->setOponente(lutador2);
+    lutador2->setOponente(lutador1);
 }
 
 void idle(void)
@@ -151,24 +154,33 @@ void idle(void)
 
     if (keyStatus[(int)('a')])
     {
-        lutador1->Move(0, inc, lutador2);
+        lutador1->Move(0, inc);
     }
     if (keyStatus[(int)('d')])
     {
-        lutador1->Move(0, -inc, lutador2);
+        lutador1->Move(0, -inc);
     }
     if (keyStatus[(int)('w')])
     {
-        lutador1->Move(inc, 0, lutador2);
+        lutador1->Move(inc, 0);
     }
     if (keyStatus[(int)('s')])
     {
-        lutador1->Move(-inc, 0, lutador2);
+        lutador1->Move(-inc, 0);
     }
     if(mouseState){
         lutador1->controleSoco(1, TODOS);
         lutador1->darSoco();
     }
+
+    if (lutador1->acerto() && lutador1->getSocoStatus())
+    {
+        lutador1->addPontos(1);
+        int pts;
+        lutador1->getPontos(pts);
+        printf("\nPontos Lutador1: %d\n\n", pts);
+    }
+
     glutPostRedisplay();
 }
 

@@ -62,7 +62,6 @@ void Circulo::desenhaBorda(GLfloat pSize, Cor* _cor)
 
 void Circulo::desenhaComBorda(Cor* _cor)
 {   
-    this->raio+=2;
     desenhaCompleto(new Cor(_cor->getR()-0.2, _cor->getG()-0.2, _cor->getG()-0.2));
     this->raio-=2;
 
