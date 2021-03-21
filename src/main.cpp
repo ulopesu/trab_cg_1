@@ -2,6 +2,7 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include <stdlib.h>
+#include<sys/time.h>
 
 #include <stdio.h>
 #include "lutador.h"
@@ -11,6 +12,14 @@
 #define INC_KEYIDLE 1
 
 #define N_MTX 4
+#define TIME_SOCO 1000  // TEMPO PARA PONTUAR SOCO EM MILISSEGUNDOS
+
+long long timeMS(void) {
+    struct timeval tv;
+
+    gettimeofday(&tv,NULL);
+    return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
+}
 
 bool onDrag = false;
 GLfloat mouseINIT_X = 0;
@@ -24,6 +33,8 @@ int keyStatus[256];
 
 const GLint Width = 700;
 const GLint Height = 700;
+
+bool click = false;
 
 //Componentes do mundo virtual sendo modelado
 bool soco = false;
@@ -53,6 +64,7 @@ void drag(int _x, int _y)
         lutador1->controleSoco(-mouseX, ESQUERDA);
     }
     lutador1->darSoco();
+
     glutPostRedisplay();
 }
 
@@ -73,6 +85,7 @@ void mouse(int button, int state, int _x, int _y)
         lutador1->controleSoco(-mouseX/Width, ESQUERDA);
     }
 
+    click=true;
     //printf("\nX: %f.Y: %f.", x, y);
     //printf("\nSTATE: %d.", state);
     glutPostRedisplay();
@@ -173,12 +186,18 @@ void idle(void)
         lutador1->darSoco();
     }
 
-    if (lutador1->acerto() && lutador1->getSocoStatus())
-    {
+    if  (   lutador1->acerto() && 
+            lutador1->getSocoStatus() &&
+            click
+        )
+    {   
+
         lutador1->addPontos(1);
         int pts;
         lutador1->getPontos(pts);
-        printf("\nPontos Lutador1: %d\n\n", pts);
+        printf("\npts: %d\n\n", pts);
+
+        click = false;
     }
 
     glutPostRedisplay();
