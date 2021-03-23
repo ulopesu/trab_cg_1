@@ -34,7 +34,7 @@ enum LadoSoco
 
 #define VEL_MOVE 5
 #define VEL_GIRO 2
-#define VEL_DAR_SOCO 4/TAM_ARENA_Y
+#define VEL_DAR_SOCO 4 / TAM_ARENA_Y
 #define VEL_VOLTAR_SOCO 10
 
 #define VEL_BOOT 0.2
@@ -109,8 +109,7 @@ public:
         string nome,
         GLfloat _gX, GLfloat _gY, Cor *_cor,
         GLfloat _theta, GLfloat _tam,
-        int TA_X, int TA_Y,
-        bool ehBoot);
+        int TA_X, int TA_Y);
 
     void setOponente(Lutador *Op)
     {
@@ -160,6 +159,24 @@ public:
     string getNome()
     {
         return gNome;
+    }
+
+    bool ehBoot()
+    {
+        return gEhBoot;
+    }
+
+    void setEhBoot(bool ehBoot)
+    {
+        gEhBoot = ehBoot;
+    }
+
+    void dirOponente()
+    {
+        GLfloat xOp, yOp, dirOp, sentido;
+        gOponente->getPosXY(xOp, yOp, dirOp);
+        GLfloat h = dist(gX, gY, xOp, yOp);
+        gTheta = atan2(gY - yOp, gX - xOp) * fromRad + 90;
     }
 };
 

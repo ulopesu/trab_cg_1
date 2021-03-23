@@ -5,7 +5,7 @@
 
 Lutador::Lutador(string nome, GLfloat _gX, GLfloat _gY, Cor *_cor,
                  GLfloat _theta, GLfloat _tam,
-                 int TA_X, int TA_Y, bool ehBoot)
+                 int TA_X, int TA_Y)
 {
     gNome = nome;
     // PRESET LOCALIZAÇÃO E DIREÇÃO
@@ -38,9 +38,6 @@ Lutador::Lutador(string nome, GLfloat _gX, GLfloat _gY, Cor *_cor,
     gTheta1_L_Ant = LIM_INF_THETA_1;
     gdSoco = 0;
     gPontos = 0;
-
-    // PRESET BOOT
-    gEhBoot = ehBoot;
 };
 
 void Lutador::DesenhaBraco(GLfloat x, GLfloat y, GLfloat theta1, GLfloat theta2,
@@ -102,7 +99,7 @@ void Lutador::DesenhaLutador(GLfloat x, GLfloat y, Cor *cor, GLfloat theta,
     glPushMatrix();
     glTranslatef(x, y, 0);
     glRotatef(gTheta, 0, 0, 1);
-    DesenhaRaioColisao(0, 0, new Cor(1, 1, 1), rClsao);
+    //DesenhaRaioColisao(0, 0, new Cor(1, 1, 1), rClsao);
     DesenhaNariz(0, rCabeca + (rNariz / 2), cor, rNariz);
     DesenhaBraco(rCabeca, 0, (-90 + theta1_R), theta2_R, tamBracos, rLuvas); // DIREITA
     DesenhaBraco(-rCabeca, 0, 90 - theta1_L, -theta2_L, tamBracos, rLuvas);  // ESQUERDA
@@ -121,11 +118,11 @@ bool Lutador::colisaoTelaX(GLfloat dXY)
     GLfloat tam = -dXY * sin(gTheta * toRad);
     if (gX > 0)
     {
-        tam += gX + rColisao;
+        tam += gX + rCabeca;
     }
     else
     {
-        tam += gX - rColisao;
+        tam += gX - rCabeca;
     }
     return abs(tam) > (TAM_ARENA_X / 2) ? true : false;
 }
@@ -135,11 +132,11 @@ bool Lutador::colisaoTelaY(GLfloat dXY)
     GLfloat tam = dXY * cos(gTheta * toRad);
     if (gY > 0)
     {
-        tam += gY + rColisao;
+        tam += gY + rCabeca;
     }
     else
     {
-        tam += gY - rColisao;
+        tam += gY - rCabeca;
     }
     return abs(tam) >= (TAM_ARENA_X / 2) ? true : false;
 }
@@ -390,12 +387,10 @@ bool Lutador::acerto()
     return acertoCab || acertoNariz;
 }
 
+
 void Lutador::moveBoot()
 {
-    GLfloat xOp, yOp, dirOp, sentido;
-    gOponente->getPosXY(xOp, yOp, dirOp);
-    GLfloat h = dist(gX, gY, xOp, yOp);
-    gTheta = atan2(gY - yOp, gX - xOp) * fromRad + 90;
+    dirOponente();
 
     Move(VEL_BOOT, 0);
 }

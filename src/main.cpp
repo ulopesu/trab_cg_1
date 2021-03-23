@@ -52,8 +52,8 @@ int FIM = false;
 string nome1("PLAYER 1");
 string nome2("PLAYER 2");
 
-Lutador *lutador1 = new Lutador(nome1, -200, 0, new Cor(0.2, 0.2, 1), 0, 50, Width, Height, false);
-Lutador *lutador2 = new Lutador(nome2, 200, 0, new Cor(1, 0.2, 0.2), 90, 50, Width, Height, true);
+Lutador *lutador1 = new Lutador(nome1, -200, 0, new Cor(0.6, 0.2, 0.6), 0, 50, Width, Height);
+Lutador *lutador2 = new Lutador(nome2, 200, 0, new Cor(0.2, 0.6, 0.6), 90, 50, Width, Height);
 
 static char str[1000];
 void *font = GLUT_BITMAP_9_BY_15;
@@ -195,6 +195,11 @@ void keyPress(unsigned char key, int x, int y)
         keyStatus[(int)('s')] = 1;
         break;
     case ' ':
+        if(lutador2->ehBoot()){
+            lutador2->setEhBoot(false);
+        }else{
+            lutador2->setEhBoot(true);
+        }
         break;
     case 27:
         free(lutador1);
@@ -231,6 +236,7 @@ void init(void)
 
     lutador1->setOponente(lutador2);
     lutador2->setOponente(lutador1);
+    lutador1->dirOponente();
 }
 
 void idle(void)
@@ -244,20 +250,23 @@ void idle(void)
     LadoSoco lSoco;
 
     //MOVIMENTO DO BOOT
-    lutador2->moveBoot();
-
-    srand(timeMS());
-    lSoco = (LadoSoco)(rand() % 3);
-
-    if (lSoco == TODOS)
+    if (lutador2->ehBoot())
     {
-        lutador2->controleSoco(1, TODOS);
-    }
-    else
-    {
+        lutador2->moveBoot();
+
         srand(timeMS());
-        dSoco = rand() % (Height * 2);
-        lutador2->controleSoco(dSoco, lSoco);
+        lSoco = (LadoSoco)(rand() % 3);
+
+        if (lSoco == TODOS)
+        {
+            lutador2->controleSoco(1, TODOS);
+        }
+        else
+        {
+            srand(timeMS());
+            dSoco = rand() % (Height * 2);
+            lutador2->controleSoco(dSoco, lSoco);
+        }
     }
 
     // PONTUACAO DO LUTADOR 1
@@ -302,7 +311,10 @@ void idle(void)
         lutador1->darSoco();
     }
 
-    lutador2->darSoco();
+    if (lutador2->ehBoot())
+    {
+        lutador2->darSoco();
+    }
 
     glutPostRedisplay();
 }
