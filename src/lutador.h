@@ -109,7 +109,7 @@ public:
         string nome,
         GLfloat _gX, GLfloat _gY, Cor *_cor,
         GLfloat _theta, GLfloat _tam,
-        int TA_X, int TA_Y);
+        GLfloat TA_X, GLfloat TA_Y);
 
     void setOponente(Lutador *Op)
     {

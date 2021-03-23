@@ -12,8 +12,6 @@
 #include "matrix.h"
 #include "tinyxml/tinyxml.h"
 
-
-
 #define INC_KEY 2
 #define INC_KEYIDLE 1
 
@@ -31,17 +29,12 @@ long long timeMS(void)
     return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
 }
 
-
 // SVG CONFIG
 
 GLfloat arenaX, arenaY, arenaWidth, arenaHeight;
-Cor* arenaCor, *lut1cor, *lut2cor;
+Cor *arenaCor, *lut1cor, *lut2cor;
 GLfloat lut1x, lut1y, lut1rCabeca;
 GLfloat lut2x, lut2y, lut2rCabeca;
-
-
-
-
 
 bool onDrag = false;
 GLfloat mouseClick_X = 0;
@@ -53,10 +46,6 @@ bool ladoMouse;
 
 int keyStatus[256];
 
-// CONFIG DA JANEA
-const GLint Width = 700;
-const GLint Height = 700;
-
 // CONTROLE DE SOCO
 bool click = false;
 long long tSocoBoot = 0;
@@ -67,8 +56,11 @@ int FIM = false;
 string nome1("PLAYER 1");
 string nome2("PLAYER 2");
 
-Lutador *lutador1 = new Lutador(nome1, -200, 0, new Cor(0.6, 0.2, 0.6), 0, 50, Width, Height);
-Lutador *lutador2 = new Lutador(nome2, 200, 0, new Cor(0.2, 0.6, 0.6), 90, 50, Width, Height);
+//Lutador *lutador1 = new Lutador(nome1, -200, 0, new Cor(0.6, 0.2, 0.6), 0, 50, arenaWidth, arenaHeight);
+//Lutador *lutador2 = new Lutador(nome2, 200, 0, new Cor(0.2, 0.6, 0.6), 90, 50, arenaWidth, arenaHeight);
+
+Lutador *lutador1;
+Lutador *lutador2;
 
 static char str[1000];
 void *font = GLUT_BITMAP_9_BY_15;
@@ -104,7 +96,7 @@ void ImprimeVitoria(Lutador *lut)
     sprintf(str, "| %s !!! WIN !!! |", lut->getNome().c_str());
 
     //Define a posicao onde vai comecar a imprimir
-    glRasterPos2f(-100, (Height / 2) - 50);
+    glRasterPos2f(-100, (arenaHeight / 2) - 50);
     //Imprime um caractere por vez
     tmpStr = str;
     while (*tmpStr)
@@ -124,19 +116,19 @@ void atualizaLadoMouse()
 
 void drag(int _x, int _y)
 {
-    mouseX = (GLfloat)_x - (Width / 2);
-    _y = Height - _y;
-    mouseY = (GLfloat)_y - (Height / 2);
+    mouseX = (GLfloat)_x - (arenaWidth / 2);
+    _y = arenaHeight - _y;
+    mouseY = (GLfloat)_y - (arenaHeight / 2);
     atualizaLadoMouse();
 
     if (!mouseState && ladoMouse)
-    {   
-        
-        lutador1->controleSoco(fabs(mouseX-mouseClick_X), DIREITA);
+    {
+
+        lutador1->controleSoco(fabs(mouseX - mouseClick_X), DIREITA);
     }
     else if (!mouseState && !ladoMouse)
     {
-        lutador1->controleSoco(fabs(mouseX-mouseClick_X), ESQUERDA);
+        lutador1->controleSoco(fabs(mouseX - mouseClick_X), ESQUERDA);
     }
     lutador1->darSoco();
 
@@ -145,9 +137,9 @@ void drag(int _x, int _y)
 
 void mouse(int button, int state, int _x, int _y)
 {
-    mouseX = (GLfloat)_x - (Width / 2);
-    _y = Height - _y;
-    mouseY = (GLfloat)_y - (Height / 2);
+    mouseX = (GLfloat)_x - (arenaWidth / 2);
+    _y = arenaHeight - _y;
+    mouseY = (GLfloat)_y - (arenaHeight / 2);
 
     mouseState = state;
     atualizaLadoMouse();
@@ -172,7 +164,7 @@ void renderScene(void)
     glClear(GL_COLOR_BUFFER_BIT);
     lutador1->Desenha();
     lutador2->Desenha();
-    ImprimePlacar(-150, (Height / 2) - 20);
+    ImprimePlacar(-150, (arenaHeight / 2) - 20);
 
     if (lutador1->getPontos() >= TOTAL_PONTOS_WIN)
     {
@@ -243,13 +235,12 @@ void ResetKeyStatus()
 void init(void)
 {
     ResetKeyStatus();
-
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(arenaCor->getR(), arenaCor->getG(), arenaCor->getB(), 1.0f);
 
     glMatrixMode(GL_PROJECTION);
-    glOrtho(-(Width / 2), (Width / 2),   //     X
-            -(Height / 2), (Height / 2), //     Y
-            -100, 100);                  //     Z
+    glOrtho(-(arenaWidth / 2), (arenaWidth / 2),   //     X
+            -(arenaHeight / 2), (arenaHeight / 2), //     Y
+            -100, 100);                            //     Z
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -283,7 +274,7 @@ void idle(void)
         else
         {
             srand(timeMS());
-            dSoco = rand() % (Height * 2);
+            dSoco = rand() % ((int)arenaHeight * 2);
             lutador2->controleSoco(dSoco, lSoco);
         }
     }
@@ -338,47 +329,85 @@ void idle(void)
     glutPostRedisplay();
 }
 
-void lerXml(const char* fileName){
+void lerXML(const char *fileName)
+{
 
     TiXmlDocument doc(fileName);
 
-	if (doc.LoadFile())
-	{
-		printf("\nLeitura do arquivo: %s -> OK!\n", fileName);
-	}
-	else
-	{
-		printf("Failed to load file: \"%s\"\n\n", fileName);
+    if (doc.LoadFile())
+    {
+        printf("\nLeitura do arquivo: %s -> OK!\n", fileName);
+    }
+    else
+    {
+        printf("Failed to load file: \"%s\"\n\n", fileName);
         exit(EXIT_FAILURE);
-	}
+    }
 
-    TiXmlElement* raiz = doc.RootElement();
+    TiXmlElement *raiz = doc.RootElement();
 
-    TiXmlElement* arena = raiz->FirstChildElement("rect");
+    char *fill;
+    GLfloat aux, dX, dY;
 
-    arena->QueryFloatAttribute("x",&arenaX); 
+    //  PARSE DA ARENA:
+    TiXmlElement *arena = raiz->FirstChildElement("rect");
+    arena->QueryFloatAttribute("x", &arenaX);
+    arena->QueryFloatAttribute("y", &arenaY);
+    arena->QueryFloatAttribute("width", &arenaWidth);
+    arena->QueryFloatAttribute("height", &arenaHeight);
+    dX = arenaWidth / 2;  //  CORRECAO X
+    dY = arenaHeight / 2; //  CORRECAO Y
 
-    printf("\n\nARENA X: %f\"\n\n", arenaX);
+    fill = strdup(arena->Attribute("fill"));
+    arenaCor = new Cor(fill);
 
+    //  PARSE DOS LUTADORES
+    //  1
+    TiXmlElement *lut1 = arena->NextSiblingElement("circle");
+    lut1->QueryFloatAttribute("cx", &aux);
+    lut1x = (aux - arenaX) - dX;
+    lut1->QueryFloatAttribute("cy", &aux);
+    lut1y = (aux - arenaY) - dY;
+    lut1->QueryFloatAttribute("r", &lut1rCabeca);
+    fill = strdup(lut1->Attribute("fill"));
+    lut1cor = new Cor(fill);
+
+    //  2
+    TiXmlElement *lut2 = lut1->NextSiblingElement("circle");
+
+    lut2->QueryFloatAttribute("cx", &aux);
+    lut2x = (aux - arenaX) - dX;
+    lut2->QueryFloatAttribute("cy", &aux);
+    lut2y = (aux - arenaY) - dY;
+    lut2->QueryFloatAttribute("r", &lut2rCabeca);
+    fill = strdup(lut2->Attribute("fill"));
+    lut2cor = new Cor(fill);
 }
 
 int main(int argc, char *argv[])
-{   
-    if(argc == 2){
-        printf("\nDIR -> OK!  \n",argv[1]);
+{
+    if (argc == 2)
+    {
+        printf("\n%s ->  OK!\n", argv[1]);
     }
-    else{
+    else
+    {
         printf("\nSem diretorio.\n\n");
         return 1;
     }
 
-    lerXml(argv[1]);
+    lerXML(argv[1]);
 
+    //printf("\n arenaWidth: %f      arenaHeight: %f\n", arenaWidth, arenaHeight);
+    //printf("\n lut1x: %f      lut1y: %f\n", lut1x, lut1y);
+
+    lutador1 = new Lutador(nome1, lut1x, lut1y, lut1cor, 0, lut1rCabeca, arenaWidth, arenaHeight);
+    lutador2 = new Lutador(nome2, lut2x, lut2y, lut2cor, 90, lut2rCabeca, arenaWidth, arenaHeight);
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 
-    glutInitWindowSize(Width, Height);
+    glutInitWindowSize(arenaWidth, arenaHeight);
     glutInitWindowPosition(150, 50);
     glutCreateWindow("Tranformations 2D");
 

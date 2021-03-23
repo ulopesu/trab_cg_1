@@ -5,7 +5,7 @@
 
 Lutador::Lutador(string nome, GLfloat _gX, GLfloat _gY, Cor *_cor,
                  GLfloat _theta, GLfloat _tam,
-                 int TA_X, int TA_Y)
+                 GLfloat TA_X, GLfloat TA_Y)
 {
     gNome = nome;
     // PRESET LOCALIZAÇÃO E DIREÇÃO
@@ -43,7 +43,7 @@ Lutador::Lutador(string nome, GLfloat _gX, GLfloat _gY, Cor *_cor,
 void Lutador::DesenhaBraco(GLfloat x, GLfloat y, GLfloat theta1, GLfloat theta2,
                            GLfloat tamBracos, GLfloat rLuvas)
 {
-    Cor *cor = new Cor(0.2, 1, 0.2);
+    Cor *cor = new Cor(0.05, 0.05, 0.05);
     glPushMatrix();
 
     glTranslatef(x, y, 0);
@@ -138,7 +138,7 @@ bool Lutador::colisaoTelaY(GLfloat dXY)
     {
         tam += gY - rCabeca;
     }
-    return abs(tam) >= (TAM_ARENA_X / 2) ? true : false;
+    return abs(tam) >= (TAM_ARENA_Y / 2) ? true : false;
 }
 
 bool Lutador::colisaoLut(GLfloat dXY)
