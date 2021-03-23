@@ -1,10 +1,13 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
-#include <stdlib.h>
-#include<sys/time.h>
-
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <iostream>
+#include <string>
+
 #include "lutador.h"
 #include "matrix.h"
 
@@ -12,13 +15,17 @@
 #define INC_KEYIDLE 1
 
 #define N_MTX 4
-#define TIME_SOCO 1000  // TEMPO PARA PONTUAR SOCO EM MILISSEGUNDOS
 
-long long timeMS(void) {
+#define TOTAL_PONTOS_WIN 10
+// TEMPO PARA PONTUAR SOCO DO BOOT EM MILISSEGUNDOS
+#define TIME_SOCO 1000
+
+long long timeMS(void)
+{
     struct timeval tv;
 
-    gettimeofday(&tv,NULL);
-    return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
+    gettimeofday(&tv, NULL);
+    return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
 }
 
 bool onDrag = false;
@@ -31,32 +38,84 @@ bool ladoMouse;
 
 int keyStatus[256];
 
+// CONFIG DA JANEA
 const GLint Width = 700;
 const GLint Height = 700;
 
+// CONTROLE DE SOCO
 bool click = false;
-
-//Componentes do mundo virtual sendo modelado
+long long tSocoBoot = 0;
 bool soco = false;
-Lutador *lutador1 = new Lutador(-200, 0, new Cor(0.2, 0.2, 1), 0, 50, Width, Height);
-Lutador *lutador2 = new Lutador(200, 0, new Cor(1, 0.2, 0.2), 0, 50, Width, Height);
+
+int FIM = false;
+//Componentes do mundo virtual sendo modelado
+string nome1("PLAYER 1");
+string nome2("PLAYER 2");
+
+Lutador *lutador1 = new Lutador(nome1, -200, 0, new Cor(0.2, 0.2, 1), 0, 50, Width, Height, false);
+Lutador *lutador2 = new Lutador(nome2, 200, 0, new Cor(1, 0.2, 0.2), 90, 50, Width, Height, true);
+
+static char str[1000];
+void *font = GLUT_BITMAP_9_BY_15;
+
+void ImprimePlacar(GLfloat x, GLfloat y)
+{
+    glColor3f(1.0, 1.0, 1.0);
+    //Cria a string a ser impressa
+    char *tmpStr;
+    int ptsLut1, ptsLut2;
+    ptsLut1 = lutador1->getPontos();
+    ptsLut2 = lutador2->getPontos();
+
+    sprintf(str, "| Player 1:  %d    |    Player 2:  %d |", ptsLut1, ptsLut2);
+
+    //Define a posicao onde vai comecar a imprimir
+    glRasterPos2f(x, y);
+    //Imprime um caractere por vez
+    tmpStr = str;
+    while (*tmpStr)
+    {
+        glutBitmapCharacter(font, *tmpStr);
+        tmpStr++;
+    }
+}
+
+void ImprimeVitoria(Lutador *lut)
+{
+    glColor3f(1.0, 1.0, 1.0);
+    //Cria a string a ser impressa
+    char *tmpStr;
+
+    sprintf(str, "| %s !!! WIN !!! |", lut->getNome().c_str());
+
+    //Define a posicao onde vai comecar a imprimir
+    glRasterPos2f(-100, (Height / 2) - 50);
+    //Imprime um caractere por vez
+    tmpStr = str;
+    while (*tmpStr)
+    {
+        glutBitmapCharacter(font, *tmpStr);
+        tmpStr++;
+    }
+    FIM = true;
+}
 
 void atualizaLadoMouse()
-{   
+{
     GLfloat xLut, yLut, dirLut;
     lutador1->getPosXY(xLut, yLut, dirLut);
     ladoMouse = (mouseX > 0);
 }
 
 void drag(int _x, int _y)
-{   
+{
     mouseX = (GLfloat)_x - (Width / 2);
     _y = Height - _y;
     mouseY = (GLfloat)_y - (Height / 2);
     atualizaLadoMouse();
 
     if (!mouseState && ladoMouse)
-    {   
+    {
         lutador1->controleSoco(mouseX, DIREITA);
     }
     else if (!mouseState && !ladoMouse)
@@ -69,7 +128,7 @@ void drag(int _x, int _y)
 }
 
 void mouse(int button, int state, int _x, int _y)
-{   
+{
     mouseX = (GLfloat)_x - (Width / 2);
     _y = Height - _y;
     mouseY = (GLfloat)_y - (Height / 2);
@@ -77,15 +136,15 @@ void mouse(int button, int state, int _x, int _y)
     mouseState = state;
     atualizaLadoMouse();
     if (!mouseState && ladoMouse)
-    {   
-        lutador1->controleSoco(mouseX/Width, DIREITA);
+    {
+        lutador1->controleSoco(mouseX / Width, DIREITA);
     }
     else if (!mouseState && !ladoMouse)
     {
-        lutador1->controleSoco(-mouseX/Width, ESQUERDA);
+        lutador1->controleSoco(-mouseX / Width, ESQUERDA);
     }
 
-    click=true;
+    click = true;
     //printf("\nX: %f.Y: %f.", x, y);
     //printf("\nSTATE: %d.", state);
     glutPostRedisplay();
@@ -95,11 +154,24 @@ void renderScene(void)
 {
     // Clear the screen.
     glClear(GL_COLOR_BUFFER_BIT);
-
     lutador1->Desenha();
     lutador2->Desenha();
-    //lutador1->acerto();
+    ImprimePlacar(-150, (Height / 2) - 20);
+
+    if (lutador1->getPontos() >= TOTAL_PONTOS_WIN)
+    {
+        ImprimeVitoria(lutador1);
+    }
+    else if (lutador2->getPontos() >= TOTAL_PONTOS_WIN)
+    {
+        ImprimeVitoria(lutador2);
+    }
+
     glutSwapBuffers(); // Desenha the new frame of the game.
+    if (FIM)
+    {
+        sleep(1000);
+    }
 }
 
 void keyPress(unsigned char key, int x, int y)
@@ -153,7 +225,7 @@ void init(void)
     glMatrixMode(GL_PROJECTION);
     glOrtho(-(Width / 2), (Width / 2),   //     X
             -(Height / 2), (Height / 2), //     Y
-            -100, 100);                                //     Z
+            -100, 100);                  //     Z
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -163,8 +235,51 @@ void init(void)
 
 void idle(void)
 {
-    double inc = INC_KEYIDLE;
 
+    double inc = INC_KEYIDLE;
+    long long diffTime;
+
+    // CONFIGURACAO DO SOCO DO BOOT;
+    int dSoco;
+    LadoSoco lSoco;
+
+    //MOVIMENTO DO BOOT
+    lutador2->moveBoot();
+
+    srand(timeMS());
+    lSoco = (LadoSoco)(rand() % 3);
+
+    if (lSoco == TODOS)
+    {
+        lutador2->controleSoco(1, TODOS);
+    }
+    else
+    {
+        srand(timeMS());
+        dSoco = rand() % (Height * 2);
+        lutador2->controleSoco(dSoco, lSoco);
+    }
+
+    // PONTUACAO DO LUTADOR 1
+    if (lutador1->acerto() &&
+        lutador1->getSocoStatus() &&
+        click)
+    {
+
+        lutador1->addPontos(1);
+        click = false;
+    }
+
+    // PONTUACAO DO BOOT
+    diffTime = timeMS() - tSocoBoot;
+    if (lutador2->acerto() &&
+        lutador2->getSocoStatus() && diffTime > TIME_SOCO)
+    {
+        lutador2->addPontos(1);
+        tSocoBoot = timeMS();
+    }
+
+    // CONTROLE DE TECLAS
     if (keyStatus[(int)('a')])
     {
         lutador1->Move(0, inc);
@@ -181,24 +296,13 @@ void idle(void)
     {
         lutador1->Move(-inc, 0);
     }
-    if(mouseState){
+    if (mouseState)
+    {
         lutador1->controleSoco(1, TODOS);
         lutador1->darSoco();
     }
 
-    if  (   lutador1->acerto() && 
-            lutador1->getSocoStatus() &&
-            click
-        )
-    {   
-
-        lutador1->addPontos(1);
-        int pts;
-        lutador1->getPontos(pts);
-        printf("\npts: %d\n\n", pts);
-
-        click = false;
-    }
+    lutador2->darSoco();
 
     glutPostRedisplay();
 }

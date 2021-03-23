@@ -5,8 +5,14 @@
 #include <GL/glu.h>
 #include <math.h>
 #include <stdio.h>
+#include <iostream>
+#include <string>
+using namespace std;
+
 #include "cor.h"
 #include "matrix.h"
+
+using namespace std;
 
 enum LadoSoco
 {
@@ -18,6 +24,7 @@ enum LadoSoco
 #define N_MTX 4
 
 #define toRad (M_PI / 180)
+#define fromRad (180 / M_PI)
 
 #define LIM_INF_THETA_1 -50
 #define LIM_INF_THETA_2 140
@@ -27,11 +34,15 @@ enum LadoSoco
 
 #define VEL_MOVE 5
 #define VEL_GIRO 2
-#define VEL_DAR_SOCO 2/350
+#define VEL_DAR_SOCO 4/TAM_ARENA_Y
 #define VEL_VOLTAR_SOCO 10
 
+#define VEL_BOOT 0.2
+
 class Lutador
-{   
+{
+    string gNome;
+
     int TAM_ARENA_X;
     int TAM_ARENA_Y;
 
@@ -58,7 +69,7 @@ class Lutador
     LadoSoco gLadoSoco;
     GLfloat gdSoco;
 
-    Lutador* gOponente;
+    Lutador *gOponente;
     int gPontos;
 
     GLfloat gTheta1_R_Ant;
@@ -66,10 +77,12 @@ class Lutador
 
     GLfloat gTheta1_L_Ant;
     GLfloat gdiffTheta1_L;
-    
+
+    bool gEhBoot;
+
 private:
-    void getPosLuvaR(GLfloat &xL,GLfloat &yL);
-    void getPosLuvaL(GLfloat &xL,GLfloat &yL);
+    void getPosLuvaR(GLfloat &xL, GLfloat &yL);
+    void getPosLuvaL(GLfloat &xL, GLfloat &yL);
     bool colisaoLut(GLfloat dXY);
     bool colisaoTelaX(GLfloat dXY);
     bool colisaoTelaY(GLfloat dXY);
@@ -92,19 +105,26 @@ private:
                         GLfloat tBracos, GLfloat rLvs, GLfloat rClsao);
 
 public:
-    Lutador(    GLfloat _gX, GLfloat _gY, Cor *_cor, 
-                GLfloat _theta, GLfloat _tam, int TA_X, int TA_Y);
+    Lutador(
+        string nome,
+        GLfloat _gX, GLfloat _gY, Cor *_cor,
+        GLfloat _theta, GLfloat _tam,
+        int TA_X, int TA_Y,
+        bool ehBoot);
 
-    void setOponente(Lutador* Op){
+    void setOponente(Lutador *Op)
+    {
         gOponente = Op;
     }
 
-    void addPontos(int pontos){
-        gPontos+=pontos;
+    void addPontos(int pontos)
+    {
+        gPontos += pontos;
     }
 
-    void getPontos(int &pontos){
-        pontos = gPontos;
+    int getPontos()
+    {
+        return gPontos;
     }
 
     void Desenha()
@@ -133,8 +153,14 @@ public:
 
     bool acerto();
 
-    void getPosNariz(GLfloat &xL,GLfloat &yL);
+    void getPosNariz(GLfloat &xL, GLfloat &yL);
 
+    void moveBoot();
+
+    string getNome()
+    {
+        return gNome;
+    }
 };
 
 #endif /* LUTADOR_H */

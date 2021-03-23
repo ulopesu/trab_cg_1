@@ -3,11 +3,11 @@
 #include "circulo.h"
 #include "retangulo.h"
 
-Lutador::Lutador(GLfloat _gX, GLfloat _gY, Cor *_cor,
+Lutador::Lutador(string nome, GLfloat _gX, GLfloat _gY, Cor *_cor,
                  GLfloat _theta, GLfloat _tam,
-                 int TA_X, int TA_Y)
+                 int TA_X, int TA_Y, bool ehBoot)
 {
-
+    gNome = nome;
     // PRESET LOCALIZAÇÃO E DIREÇÃO
     TAM_ARENA_X = TA_X;
     TAM_ARENA_Y = TA_Y;
@@ -22,14 +22,13 @@ Lutador::Lutador(GLfloat _gX, GLfloat _gY, Cor *_cor,
     GLfloat dir[1][4];
 
     // PRESET DE TAMANHOS E ESCALAS E CORES
-    _tam /= 9;
+    rCabeca = _tam * 0.5;
     gX = _gX;
     gY = _gY;
     cor = _cor;
-    rCabeca = _tam * 4;
-    rNariz = _tam;
-    tamBracos = _tam * 8;
-    rLuvas = _tam * 1.5;
+    rNariz = rCabeca / 5;
+    tamBracos = rCabeca * 2;
+    rLuvas = rCabeca / 2;
     rColisao = rCabeca * 3;
 
     // PRESET DE SOCO
@@ -39,6 +38,9 @@ Lutador::Lutador(GLfloat _gX, GLfloat _gY, Cor *_cor,
     gTheta1_L_Ant = LIM_INF_THETA_1;
     gdSoco = 0;
     gPontos = 0;
+
+    // PRESET BOOT
+    gEhBoot = ehBoot;
 };
 
 void Lutador::DesenhaBraco(GLfloat x, GLfloat y, GLfloat theta1, GLfloat theta2,
@@ -174,7 +176,7 @@ void Lutador::Move(GLfloat dXY, GLfloat dTheta)
     dTheta *= VEL_GIRO;
     gTheta += dTheta;
 
-    if (dXY)
+    if (dXY != 0)
     {
         if (!colisaoX(dXY) && !colisaoLut(dXY))
         {
@@ -386,4 +388,14 @@ bool Lutador::acerto()
                            : false;
 
     return acertoCab || acertoNariz;
+}
+
+void Lutador::moveBoot()
+{
+    GLfloat xOp, yOp, dirOp, sentido;
+    gOponente->getPosXY(xOp, yOp, dirOp);
+    GLfloat h = dist(gX, gY, xOp, yOp);
+    gTheta = atan2(gY - yOp, gX - xOp) * fromRad + 90;
+
+    Move(VEL_BOOT, 0);
 }
