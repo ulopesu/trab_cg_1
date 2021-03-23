@@ -10,6 +10,9 @@
 
 #include "lutador.h"
 #include "matrix.h"
+#include "tinyxml/tinyxml.h"
+
+
 
 #define INC_KEY 2
 #define INC_KEYIDLE 1
@@ -27,6 +30,18 @@ long long timeMS(void)
     gettimeofday(&tv, NULL);
     return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
 }
+
+
+// SVG CONFIG
+
+GLfloat arenaX, arenaY, arenaWidth, arenaHeight;
+Cor* arenaCor, *lut1cor, *lut2cor;
+GLfloat lut1x, lut1y, lut1rCabeca;
+GLfloat lut2x, lut2y, lut2rCabeca;
+
+
+
+
 
 bool onDrag = false;
 GLfloat mouseClick_X = 0;
@@ -104,7 +119,7 @@ void atualizaLadoMouse()
 {
     GLfloat xLut, yLut, dirLut;
     lutador1->getPosXY(xLut, yLut, dirLut);
-    ladoMouse = (mouseX > 0);
+    ladoMouse = (mouseX > mouseClick_X);
 }
 
 void drag(int _x, int _y)
@@ -115,12 +130,13 @@ void drag(int _x, int _y)
     atualizaLadoMouse();
 
     if (!mouseState && ladoMouse)
-    {
-        lutador1->controleSoco(mouseX-mouseClick_X, DIREITA);
+    {   
+        
+        lutador1->controleSoco(fabs(mouseX-mouseClick_X), DIREITA);
     }
     else if (!mouseState && !ladoMouse)
     {
-        lutador1->controleSoco(-(mouseX-mouseClick_X), ESQUERDA);
+        lutador1->controleSoco(fabs(mouseX-mouseClick_X), ESQUERDA);
     }
     lutador1->darSoco();
 
@@ -322,8 +338,43 @@ void idle(void)
     glutPostRedisplay();
 }
 
+void lerXml(const char* fileName){
+
+    TiXmlDocument doc(fileName);
+
+	if (doc.LoadFile())
+	{
+		printf("\nLeitura do arquivo: %s -> OK!\n", fileName);
+	}
+	else
+	{
+		printf("Failed to load file: \"%s\"\n\n", fileName);
+        exit(EXIT_FAILURE);
+	}
+
+    TiXmlElement* raiz = doc.RootElement();
+
+    TiXmlElement* arena = raiz->FirstChildElement("rect");
+
+    arena->QueryFloatAttribute("x",&arenaX); 
+
+    printf("\n\nARENA X: %f\"\n\n", arenaX);
+
+}
+
 int main(int argc, char *argv[])
-{
+{   
+    if(argc == 2){
+        printf("\nDIR -> OK!  \n",argv[1]);
+    }
+    else{
+        printf("\nSem diretorio.\n\n");
+        return 1;
+    }
+
+    lerXml(argv[1]);
+
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 

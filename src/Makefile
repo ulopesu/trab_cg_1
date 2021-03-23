@@ -2,4 +2,8 @@ all: g++
 	@echo "Done."
 
 g++: *.cpp
-	g++ -o trabalhocg *.cpp -lGL -lGLU -lglut -lm
+	g++ -c *.cpp tinyxml/*.cpp 
+	g++ -o trabalhocg *.h *.o -lGL -lGLU -lglut -lm
+
+clean:
+	rm -rf *.o
