@@ -29,8 +29,8 @@ long long timeMS(void)
 }
 
 bool onDrag = false;
-GLfloat mouseINIT_X = 0;
-GLfloat mouseINIT_Y = 0;
+GLfloat mouseClick_X = 0;
+GLfloat mouseClick_Y = 0;
 GLfloat mouseX = 0;
 GLfloat mouseY = 0;
 int mouseState;
@@ -116,11 +116,11 @@ void drag(int _x, int _y)
 
     if (!mouseState && ladoMouse)
     {
-        lutador1->controleSoco(mouseX, DIREITA);
+        lutador1->controleSoco(mouseX-mouseClick_X, DIREITA);
     }
     else if (!mouseState && !ladoMouse)
     {
-        lutador1->controleSoco(-mouseX, ESQUERDA);
+        lutador1->controleSoco(-(mouseX-mouseClick_X), ESQUERDA);
     }
     lutador1->darSoco();
 
@@ -137,11 +137,11 @@ void mouse(int button, int state, int _x, int _y)
     atualizaLadoMouse();
     if (!mouseState && ladoMouse)
     {
-        lutador1->controleSoco(mouseX / Width, DIREITA);
+        mouseClick_X = mouseX;
     }
     else if (!mouseState && !ladoMouse)
     {
-        lutador1->controleSoco(-mouseX / Width, ESQUERDA);
+        mouseClick_X = mouseX;
     }
 
     click = true;
@@ -195,9 +195,12 @@ void keyPress(unsigned char key, int x, int y)
         keyStatus[(int)('s')] = 1;
         break;
     case ' ':
-        if(lutador2->ehBoot()){
+        if (lutador2->ehBoot())
+        {
             lutador2->setEhBoot(false);
-        }else{
+        }
+        else
+        {
             lutador2->setEhBoot(true);
         }
         break;

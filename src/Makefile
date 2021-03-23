@@ -2,4 +2,4 @@ all: g++
 	@echo "Done."
 
 g++: *.cpp
-	g++ -o trab *.cpp -lGL -lGLU -lglut -lm
+	g++ -o trabalhocg *.cpp -lGL -lGLU -lglut -lm
