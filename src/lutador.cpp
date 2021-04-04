@@ -285,54 +285,52 @@ void Lutador::darSoco()
 void Lutador::getPosLuvaR(GLfloat &xL, GLfloat &yL)
 {
     GLfloat **mtx_lut = identityMatrix(N_MTX);
-    GLfloat **aux, aux2;
+    GLfloat **aux;
+
+    aux = translateMatrix(identityMatrix(N_MTX), tamBracos, 0, 0, N_MTX);
+    aux = rotateZmatrix(aux, gTheta1_R, N_MTX);
+
+    mtx_lut = translateMatrix(mtx_lut, aux[0][0], aux[1][0], aux[2][0], N_MTX);
+
+    aux = translateMatrix(identityMatrix(N_MTX), tamBracos-2, 0, 0, N_MTX);
+    aux = rotateZmatrix(aux, gTheta2_R+gTheta1_R+2, N_MTX);
+
+    mtx_lut = translateMatrix(mtx_lut, aux[0][0], aux[1][0], aux[2][0], N_MTX);
 
     mtx_lut = translateMatrix(mtx_lut, rCabeca, 0, 0, N_MTX);
-
-    aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
-    aux = rotateMatrix(aux, 0, 0, 90 - gTheta1_R, N_MTX);
-
-    mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
-
-    aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
-    aux = rotateMatrix(aux, 0, 0, 87 - gTheta1_R - gTheta2_R, N_MTX);
-
-    mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
-
-    mtx_lut = rotateMatrix(mtx_lut, 0, 0, -gTheta, N_MTX);
+    mtx_lut = rotateMatrix(mtx_lut, 0, 0, gTheta, N_MTX);
     mtx_lut = translateMatrix(mtx_lut, gX, gY, 0, N_MTX);
 
     xL = mtx_lut[0][0];
-    yL = mtx_lut[0][1];
+    yL = mtx_lut[1][0];
 
-    //Circulo *circ = new Circulo(rLuvas, 100, mtx_lut[0][0], mtx_lut[0][1]);
+    //Circulo *circ = new Circulo(rLuvas, 100, xL, yL);
     //circ->desenhaCompleto(new Cor(0,1,1));
 }
 
 void Lutador::getPosLuvaL(GLfloat &xL, GLfloat &yL)
 {
     GLfloat **mtx_lut = identityMatrix(N_MTX);
-    GLfloat **aux, aux2;
+    GLfloat **aux;
+
+    aux = translateMatrix(identityMatrix(N_MTX), tamBracos, 0, 0, N_MTX);
+    aux = rotateZmatrix(aux, 180-gTheta1_L, N_MTX);
+
+    mtx_lut = translateMatrix(mtx_lut, aux[0][0], aux[1][0], aux[2][0], N_MTX);
+
+    aux = translateMatrix(identityMatrix(N_MTX), tamBracos-2, 0, 0, N_MTX);
+    aux = rotateZmatrix(aux, 180-gTheta1_L-gTheta2_L+1, N_MTX);
+
+    mtx_lut = translateMatrix(mtx_lut, aux[0][0], aux[1][0], aux[2][0], N_MTX);
 
     mtx_lut = translateMatrix(mtx_lut, -rCabeca, 0, 0, N_MTX);
-
-    aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
-    aux = rotateMatrix(aux, 0, 0, gTheta1_L - 90, N_MTX);
-
-    mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
-
-    aux = translateMatrix(identityMatrix(N_MTX), 0, tamBracos, 0, N_MTX);
-    aux = rotateMatrix(aux, 0, 0, -93 + gTheta1_L + gTheta2_L, N_MTX);
-
-    mtx_lut = translateMatrix(aux, mtx_lut[0][0], mtx_lut[0][1], 0, N_MTX);
-
-    mtx_lut = rotateMatrix(mtx_lut, 0, 0, -gTheta, N_MTX);
+    mtx_lut = rotateMatrix(mtx_lut, 0, 0, gTheta, N_MTX);
     mtx_lut = translateMatrix(mtx_lut, gX, gY, 0, N_MTX);
 
     xL = mtx_lut[0][0];
-    yL = mtx_lut[0][1];
+    yL = mtx_lut[1][0];
 
-    //Circulo *circ = new Circulo(rLuvas, 100, mtx_lut[0][0], mtx_lut[0][1]);
+    //Circulo *circ = new Circulo(rLuvas, 100, xL, yL);
     //circ->desenhaCompleto(new Cor(0,1,1));
 }
 

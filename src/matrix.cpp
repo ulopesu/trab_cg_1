@@ -84,8 +84,9 @@ GLfloat **multiMatrix(GLfloat **m1, GLfloat **m2, int N)
     }
     return result;
 }
-/*
+
 GLfloat** rotateZmatrix(GLfloat **m1, GLfloat c,  int N) {
+
     GLfloat **mtx_rotate = identityMatrix(N);
 
     c *= toRad;
@@ -96,10 +97,11 @@ GLfloat** rotateZmatrix(GLfloat **m1, GLfloat c,  int N) {
     mtx_rotate[1][0] = sin(c);
     mtx_rotate[1][1] = cos(c);
 
-    return multiMatrix(m1, mtx_rotate, N);
+    return multiMatrix(mtx_rotate, m1, N);
 }
 
 GLfloat** rotateYmatrix(GLfloat **m1, GLfloat b,  int N) {
+
     GLfloat **mtx_rotate = identityMatrix(N);
 
     mtx_rotate[0][0] = cos(b);
@@ -108,10 +110,11 @@ GLfloat** rotateYmatrix(GLfloat **m1, GLfloat b,  int N) {
     mtx_rotate[2][0] = -sin(b);
     mtx_rotate[2][2] = cos(b);
 
-    return multiMatrix(m1, mtx_rotate, N);
+    return multiMatrix(mtx_rotate, m1, N);
 }
 
 GLfloat** rotateXmatrix(GLfloat **m1, GLfloat a,  int N) {
+
     GLfloat **mtx_rotate = identityMatrix(N);
 
     mtx_rotate[1][1] = cos(a);
@@ -120,11 +123,11 @@ GLfloat** rotateXmatrix(GLfloat **m1, GLfloat a,  int N) {
     mtx_rotate[2][1] = sin(a);
     mtx_rotate[2][2] = cos(a);
 
-    return multiMatrix(m1, mtx_rotate, N);
+    return multiMatrix(mtx_rotate, m1, N);
 }
-*/
+
 GLfloat **rotateMatrix(GLfloat **m1, GLfloat a, GLfloat b, GLfloat c, int N)
-{
+{   
     GLfloat **mtx_rotate = identityMatrix(N);
 
     a *= toRad;
@@ -143,33 +146,37 @@ GLfloat **rotateMatrix(GLfloat **m1, GLfloat a, GLfloat b, GLfloat c, int N)
     mtx_rotate[2][1] = (cos(a) * sin(b) * sin(c)) + (sin(a) * cos(c));
     mtx_rotate[2][2] = cos(a) * cos(b);
 
-    return multiMatrix(m1, mtx_rotate, N);
+    return multiMatrix(mtx_rotate, m1, N);
 }
 
 GLfloat **translateMatrix(GLfloat **m1, GLfloat dx, GLfloat dy, GLfloat dz, int N)
-{
+{   
+    m1[3][0] = 1;
+    m1[3][1] = 1;
+    m1[3][2] = 1;
+    m1[3][3] = 1;
 
     GLfloat **mtxTL = identityMatrix(N);
-    mtxTL[3][0] = dx;
-    mtxTL[3][1] = dy;
-    mtxTL[3][2] = dz;
+    mtxTL[0][3] = dx;
+    mtxTL[1][3] = dy;
+    mtxTL[2][3] = dz;
 
-    m1[0][3] = 1;
-    m1[1][3] = 1;
-    m1[2][3] = 1;
-
-    return multiMatrix(m1, mtxTL, N);
+    return multiMatrix(mtxTL, m1, N);
 }
 
 GLfloat **scaleMatrix(GLfloat **m1, GLfloat sx, GLfloat sy, GLfloat sz, int N)
-{
+{      
+    m1[3][0] = 1;
+    m1[3][1] = 1;
+    m1[3][2] = 1;
+    m1[3][3] = 1;
 
     GLfloat **mtxS = identityMatrix(N);
-    mtxS[0][2] = sx;
-    mtxS[1][2] = sy;
+    mtxS[0][0] = sx;
+    mtxS[1][1] = sy;
     mtxS[2][2] = sz;
 
-    return multiMatrix(m1, mtxS, N);
+    return multiMatrix(mtxS, m1, N);
 }
 
 GLfloat dist(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2)
