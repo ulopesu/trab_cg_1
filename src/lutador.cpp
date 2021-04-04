@@ -347,7 +347,7 @@ void Lutador::getPosNariz(GLfloat &xL, GLfloat &yL)
     //circ->desenhaCompleto(new Cor(0,1,1));
 }
 
-bool Lutador::acerto()
+bool Lutador::acerto(bool &acerto_ant)
 {
     GLfloat xOp, yOp, dirOp, xLuva, yLuva;
     gOponente->getPosXY(xOp, yOp, dirOp);
@@ -362,10 +362,9 @@ bool Lutador::acerto()
 
     //printf("\n gdiffTheta1_R: %f \n gdiffTheta1_L: %f\n", gdiffTheta1_R, gdiffTheta1_L);
 
-    bool acertoCab = (((dtR < rLuvas + rCabeca) && gdiffTheta1_R < 0) ||
-                      ((dtL < rLuvas + rCabeca) && gdiffTheta1_L < 0))
-                         ? true
-                         : false;
+    bool bracoRCab = (dtR < rLuvas + rCabeca);
+    bool bracoLCab = (dtL < rLuvas + rCabeca);
+    bool acertoCab = ((bracoRCab && gdiffTheta1_R < 0) || (bracoLCab && gdiffTheta1_L < 0));
 
     // NARIZ OPONENTE
     gOponente->getPosNariz(xOp, yOp);
@@ -380,14 +379,15 @@ bool Lutador::acerto()
 
     //printf("\ndT: %f\nRAIOS: %f\n", dt, (rLuvas + rCabeca));
 
-    bool acertoNariz = (((dtR < rLuvas + rNariz) && gdiffTheta1_R < 0) ||
-                        ((dtL < rLuvas + rNariz) && gdiffTheta1_L < 0))
-                           ? true
-                           : false;
+    bool bracoRNariz = (dtR < rLuvas + rNariz);
+    bool bracoLNariz = (dtL < rLuvas + rNariz);
+    bool acertoNariz = ((bracoRNariz && gdiffTheta1_R < 0) || (bracoLNariz && gdiffTheta1_L < 0));
+    bool acerto = (acertoCab || acertoNariz) && !acerto_ant;
 
-    return acertoCab || acertoNariz;
+    acerto_ant = bracoRCab || bracoLCab || bracoRNariz || bracoLNariz;
+
+    return acerto;
 }
-
 
 void Lutador::moveBoot()
 {

@@ -21,13 +21,8 @@
 // TEMPO PARA PONTUAR SOCO DO BOOT EM MILISSEGUNDOS
 #define TIME_SOCO 1000
 
-long long timeMS(void)
-{
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-    return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
-}
+// FIM DO JOGO
+int FIM = false;
 
 // SVG CONFIG
 
@@ -36,6 +31,7 @@ Cor *arenaCor, *lut1cor, *lut2cor;
 GLfloat lut1x, lut1y, lut1rCabeca;
 GLfloat lut2x, lut2y, lut2rCabeca;
 
+// MOUSE CONFIG
 bool onDrag = false;
 GLfloat mouseClick_X = 0;
 GLfloat mouseClick_Y = 0;
@@ -46,22 +42,30 @@ bool ladoMouse;
 
 int keyStatus[256];
 
-// CONTROLE DE SOCO
+// TEMPO DO ACERTO DO ULTIMO SOCO DO BOOT
 long long tSocoBoot = 0;
 
-int FIM = false;
-//Componentes do mundo virtual sendo modelado
+// OUTRAS CONFIG DOS JOGADORES
 string nome1("PLAYER 1");
 string nome2("PLAYER 2");
-
-//Lutador *lutador1 = new Lutador(nome1, -200, 0, new Cor(0.6, 0.2, 0.6), 0, 50, arenaWidth, arenaHeight);
-//Lutador *lutador2 = new Lutador(nome2, 200, 0, new Cor(0.2, 0.6, 0.6), 90, 50, arenaWidth, arenaHeight);
 
 Lutador *lutador1;
 Lutador *lutador2;
 
+bool lut1_acerto_ant = false;
+bool lut2_acerto_ant = false;
+
 static char str[1000];
 void *font = GLUT_BITMAP_9_BY_15;
+
+
+long long timeMS(void)
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
+}
 
 void ImprimePlacar(GLfloat x, GLfloat y)
 {
@@ -310,16 +314,16 @@ void idle(void)
         }
 
         // PONTUACAO DO LUTADOR 1
-        if (lutador1->acerto() &&
-            lutador1->getSocoStatus())
+        bool acerto = lutador1->acerto(lut1_acerto_ant);
+        if (acerto && lutador1->getSocoStatus())
         {
-
             lutador1->addPontos(1);
         }
 
+
         // PONTUACAO DO BOOT
         diffTime = timeMS() - tSocoBoot;
-        if (lutador2->acerto() &&
+        if (lutador2->acerto(lut2_acerto_ant) &&
             lutador2->getSocoStatus() && diffTime > TIME_SOCO)
         {
             lutador2->addPontos(1);

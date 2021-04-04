@@ -150,7 +150,7 @@ public:
         return gSocoStatus;
     }
 
-    bool acerto();
+    bool acerto(bool &acerto_ant);
 
     void getPosNariz(GLfloat &xL, GLfloat &yL);
 
