@@ -6,4 +6,4 @@ g++: *.cpp
 	g++ -o trabalhocg *.h *.o -lGL -lGLU -lglut -lm
 
 clean:
-	rm -rf *.o
+	rm -rf *.o trabalhocg

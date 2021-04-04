@@ -8,6 +8,7 @@ Lutador::Lutador(string nome, GLfloat _gX, GLfloat _gY, Cor *_cor,
                  GLfloat TA_X, GLfloat TA_Y)
 {
     gNome = nome;
+    gEhBoot = false;
     // PRESET LOCALIZAÇÃO E DIREÇÃO
     TAM_ARENA_X = TA_X;
     TAM_ARENA_Y = TA_Y;

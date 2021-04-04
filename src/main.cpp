@@ -47,9 +47,7 @@ bool ladoMouse;
 int keyStatus[256];
 
 // CONTROLE DE SOCO
-bool click = false;
 long long tSocoBoot = 0;
-bool soco = false;
 
 int FIM = false;
 //Componentes do mundo virtual sendo modelado
@@ -87,6 +85,24 @@ void ImprimePlacar(GLfloat x, GLfloat y)
     }
 }
 
+void ImprimeReload(){
+    glColor3f(1.0, 1.0, 1.0);
+
+    char *tmpStr;
+
+    sprintf(str, "Press (R) to RELOAD!");
+
+    //Define a posicao onde vai comecar a imprimir
+    glRasterPos2f(-85, (arenaHeight / 2) - 200);
+    //Imprime um caractere por vez
+    tmpStr = str;
+    while (*tmpStr)
+    {
+        glutBitmapCharacter(font, *tmpStr);
+        tmpStr++;
+    }
+}
+
 void ImprimeVitoria(Lutador *lut)
 {
     glColor3f(1.0, 1.0, 1.0);
@@ -115,70 +131,49 @@ void atualizaLadoMouse()
 }
 
 void drag(int _x, int _y)
-{
-    mouseX = (GLfloat)_x - (arenaWidth / 2);
-    _y = arenaHeight - _y;
-    mouseY = (GLfloat)_y - (arenaHeight / 2);
-    atualizaLadoMouse();
+{   
+    if(!FIM){
+        mouseX = (GLfloat)_x - (arenaWidth / 2);
+        _y = arenaHeight - _y;
+        mouseY = (GLfloat)_y - (arenaHeight / 2);
+        atualizaLadoMouse();
 
-    if (!mouseState && ladoMouse)
-    {
+        if (!mouseState && ladoMouse)
+        {
 
-        lutador1->controleSoco(fabs(mouseX - mouseClick_X), DIREITA);
+            lutador1->controleSoco(fabs(mouseX - mouseClick_X), DIREITA);
+        }
+        else if (!mouseState && !ladoMouse)
+        {
+            lutador1->controleSoco(fabs(mouseX - mouseClick_X), ESQUERDA);
+        }
+        lutador1->darSoco();
+
+        glutPostRedisplay();
     }
-    else if (!mouseState && !ladoMouse)
-    {
-        lutador1->controleSoco(fabs(mouseX - mouseClick_X), ESQUERDA);
-    }
-    lutador1->darSoco();
-
-    glutPostRedisplay();
 }
 
 void mouse(int button, int state, int _x, int _y)
-{
-    mouseX = (GLfloat)_x - (arenaWidth / 2);
-    _y = arenaHeight - _y;
-    mouseY = (GLfloat)_y - (arenaHeight / 2);
-
-    mouseState = state;
-    atualizaLadoMouse();
-    if (!mouseState && ladoMouse)
+{   
+    if (!FIM)
     {
-        mouseClick_X = mouseX;
-    }
-    else if (!mouseState && !ladoMouse)
-    {
-        mouseClick_X = mouseX;
-    }
+        mouseX = (GLfloat)_x - (arenaWidth / 2);
+        _y = arenaHeight - _y;
+        mouseY = (GLfloat)_y - (arenaHeight / 2);
 
-    click = true;
-    //printf("\nX: %f.Y: %f.", x, y);
-    //printf("\nSTATE: %d.", state);
-    glutPostRedisplay();
-}
-
-void renderScene(void)
-{
-    // Clear the screen.
-    glClear(GL_COLOR_BUFFER_BIT);
-    lutador1->Desenha();
-    lutador2->Desenha();
-    ImprimePlacar(-150, (arenaHeight / 2) - 20);
-
-    if (lutador1->getPontos() >= TOTAL_PONTOS_WIN)
-    {
-        ImprimeVitoria(lutador1);
-    }
-    else if (lutador2->getPontos() >= TOTAL_PONTOS_WIN)
-    {
-        ImprimeVitoria(lutador2);
-    }
-
-    glutSwapBuffers(); // Desenha the new frame of the game.
-    if (FIM)
-    {
-        sleep(1000);
+        mouseState = state;
+        atualizaLadoMouse();
+        if (!mouseState && ladoMouse)
+        {
+            mouseClick_X = mouseX;
+        }
+        else if (!mouseState && !ladoMouse)
+        {
+            mouseClick_X = mouseX;
+        }
+        //printf("\nX: %f.Y: %f.", x, y);
+        //printf("\nSTATE: %d.", state);
+        glutPostRedisplay();
     }
 }
 
@@ -203,17 +198,28 @@ void keyPress(unsigned char key, int x, int y)
         keyStatus[(int)('s')] = 1;
         break;
     case ' ':
-        if (lutador2->ehBoot())
+        if (!FIM)
         {
-            lutador2->setEhBoot(false);
+            lutador2->ehBoot() ? lutador2->setEhBoot(false) : lutador2->setEhBoot(true);
         }
-        else
-        {
-            lutador2->setEhBoot(true);
+        break;
+    case 'r':
+    case 'R':
+        if(FIM){
+            free(lutador1);
+            free(lutador2);
+            lutador1 = new Lutador(nome1, lut1x, lut1y, lut1cor, 0, lut1rCabeca, arenaWidth, arenaHeight);
+            lutador2 = new Lutador(nome2, lut2x, lut2y, lut2cor, 90, lut2rCabeca, arenaWidth, arenaHeight);
+            lutador1->setOponente(lutador2);
+            lutador2->setOponente(lutador1);
+            lutador1->dirOponente();
+            lutador2->dirOponente();
+            FIM = false;
         }
         break;
     case 27:
         free(lutador1);
+        free(lutador2);
         exit(0);
     }
     glutPostRedisplay();
@@ -223,6 +229,29 @@ void keyup(unsigned char key, int x, int y)
 {
     keyStatus[(int)(key)] = 0;
     glutPostRedisplay();
+}
+
+void renderScene(void)
+{   
+    glClear(GL_COLOR_BUFFER_BIT);
+    lutador1->Desenha();
+    lutador2->Desenha();
+    ImprimePlacar(-150, (arenaHeight / 2) - 20);
+
+    if (lutador1->getPontos() >= TOTAL_PONTOS_WIN)
+    {
+        ImprimeVitoria(lutador1);
+    }
+    else if (lutador2->getPontos() >= TOTAL_PONTOS_WIN)
+    {
+        ImprimeVitoria(lutador2);
+    }
+
+    if (FIM)
+    {
+        ImprimeReload();
+    }
+    glutSwapBuffers(); // Desenha the new frame of the game.
 }
 
 void ResetKeyStatus()
@@ -247,86 +276,86 @@ void init(void)
     lutador1->setOponente(lutador2);
     lutador2->setOponente(lutador1);
     lutador1->dirOponente();
+    lutador2->dirOponente();
 }
 
 void idle(void)
 {
+    if(!FIM){
+        double inc = INC_KEYIDLE;
+        long long diffTime;
 
-    double inc = INC_KEYIDLE;
-    long long diffTime;
+        // CONFIGURACAO DO SOCO DO BOOT;
+        int dSoco;
+        LadoSoco lSoco;
 
-    // CONFIGURACAO DO SOCO DO BOOT;
-    int dSoco;
-    LadoSoco lSoco;
-
-    //MOVIMENTO DO BOOT
-    if (lutador2->ehBoot())
-    {
-        lutador2->moveBoot();
-
-        srand(timeMS());
-        lSoco = (LadoSoco)(rand() % 3);
-
-        if (lSoco == TODOS)
+        //MOVIMENTO DO BOOT
+        if (lutador2->ehBoot())
         {
-            lutador2->controleSoco(1, TODOS);
-        }
-        else
-        {
+            lutador2->moveBoot();
+
             srand(timeMS());
-            dSoco = rand() % ((int)arenaHeight * 2);
-            lutador2->controleSoco(dSoco, lSoco);
+            lSoco = (LadoSoco)(rand() % 3);
+
+            if (lSoco == TODOS)
+            {
+                lutador2->controleSoco(1, TODOS);
+            }
+            else
+            {
+                srand(timeMS());
+                dSoco = rand() % ((int)arenaHeight * 2);
+                lutador2->controleSoco(dSoco, lSoco);
+            }
         }
-    }
 
-    // PONTUACAO DO LUTADOR 1
-    if (lutador1->acerto() &&
-        lutador1->getSocoStatus() &&
-        click)
-    {
+        // PONTUACAO DO LUTADOR 1
+        if (lutador1->acerto() &&
+            lutador1->getSocoStatus())
+        {
 
-        lutador1->addPontos(1);
-        click = false;
-    }
+            lutador1->addPontos(1);
+        }
 
-    // PONTUACAO DO BOOT
-    diffTime = timeMS() - tSocoBoot;
-    if (lutador2->acerto() &&
-        lutador2->getSocoStatus() && diffTime > TIME_SOCO)
-    {
-        lutador2->addPontos(1);
-        tSocoBoot = timeMS();
-    }
+        // PONTUACAO DO BOOT
+        diffTime = timeMS() - tSocoBoot;
+        if (lutador2->acerto() &&
+            lutador2->getSocoStatus() && diffTime > TIME_SOCO)
+        {
+            lutador2->addPontos(1);
+            tSocoBoot = timeMS();
+        }
 
-    // CONTROLE DE TECLAS
-    if (keyStatus[(int)('a')])
-    {
-        lutador1->Move(0, inc);
-    }
-    if (keyStatus[(int)('d')])
-    {
-        lutador1->Move(0, -inc);
-    }
-    if (keyStatus[(int)('w')])
-    {
-        lutador1->Move(inc, 0);
-    }
-    if (keyStatus[(int)('s')])
-    {
-        lutador1->Move(-inc, 0);
-    }
-    if (mouseState)
-    {
-        lutador1->controleSoco(1, TODOS);
-        lutador1->darSoco();
-    }
+        // CONTROLE DE TECLAS
+        if (keyStatus[(int)('a')])
+        {
+            lutador1->Move(0, inc);
+        }
+        if (keyStatus[(int)('d')])
+        {
+            lutador1->Move(0, -inc);
+        }
+        if (keyStatus[(int)('w')])
+        {
+            lutador1->Move(inc, 0);
+        }
+        if (keyStatus[(int)('s')])
+        {
+            lutador1->Move(-inc, 0);
+        }
+        if (mouseState)
+        {
+            lutador1->controleSoco(1, TODOS);
+            lutador1->darSoco();
+        }
 
-    if (lutador2->ehBoot())
-    {
-        lutador2->darSoco();
-    }
+        if (lutador2->ehBoot())
+        {
+            lutador2->darSoco();
+        }
 
-    glutPostRedisplay();
+        glutPostRedisplay();
+    }
 }
 
 void lerXML(const char *fileName)
@@ -367,7 +396,7 @@ void lerXML(const char *fileName)
     lut1->QueryFloatAttribute("cx", &aux);
     lut1x = (aux - arenaX) - dX;
     lut1->QueryFloatAttribute("cy", &aux);
-    lut1y = (aux - arenaY) - dY;
+    lut1y = (aux - arenaY - dY) * (-1);
     lut1->QueryFloatAttribute("r", &lut1rCabeca);
     fill = strdup(lut1->Attribute("fill"));
     lut1cor = new Cor(fill);
@@ -378,7 +407,7 @@ void lerXML(const char *fileName)
     lut2->QueryFloatAttribute("cx", &aux);
     lut2x = (aux - arenaX) - dX;
     lut2->QueryFloatAttribute("cy", &aux);
-    lut2y = (aux - arenaY) - dY;
+    lut2y = (aux - arenaY - dY) * (-1);
     lut2->QueryFloatAttribute("r", &lut2rCabeca);
     fill = strdup(lut2->Attribute("fill"));
     lut2cor = new Cor(fill);
@@ -410,18 +439,16 @@ int main(int argc, char *argv[])
     glutInitWindowSize(arenaWidth, arenaHeight);
     glutInitWindowPosition(150, 50);
     glutCreateWindow("Tranformations 2D");
-
+    
     glutDisplayFunc(renderScene);
     glutKeyboardFunc(keyPress);
     glutIdleFunc(idle);
     glutKeyboardUpFunc(keyup);
-
     glutMotionFunc(drag);
     glutMouseFunc(mouse);
 
     init();
-
     glutMainLoop();
-
+    
     return 0;
 }

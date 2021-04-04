@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "cmath": "cpp",
+        "string": "cpp"
+    },
+    "svg.preview.background": "transparent"
+}
