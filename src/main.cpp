@@ -18,8 +18,9 @@
 #define N_MTX 4
 
 #define TOTAL_PONTOS_WIN 10
-// TEMPO PARA PONTUAR SOCO DO BOOT EM MILISSEGUNDOS
-#define TIME_SOCO 1000
+
+// VELOCIDADE DO SOCO DO BOOT
+#define VEL_SOCO_BOOT 20
 
 // FIM DO JOGO
 int FIM = false;
@@ -51,13 +52,15 @@ string nome2("PLAYER 2");
 
 Lutador *lutador1;
 Lutador *lutador2;
+GLfloat dSocoBoot = 0;
+LadoSoco lSocoBoot = DIREITA;
+bool goBackSoco = false;
 
 bool lut1_acerto_ant = false;
 bool lut2_acerto_ant = false;
 
 static char str[1000];
 void *font = GLUT_BITMAP_9_BY_15;
-
 
 long long timeMS(void)
 {
@@ -89,7 +92,8 @@ void ImprimePlacar(GLfloat x, GLfloat y)
     }
 }
 
-void ImprimeReload(){
+void ImprimeReload()
+{
     glColor3f(1.0, 1.0, 1.0);
 
     char *tmpStr;
@@ -135,8 +139,9 @@ void atualizaLadoMouse()
 }
 
 void drag(int _x, int _y)
-{   
-    if(!FIM){
+{
+    if (!FIM)
+    {
         mouseX = (GLfloat)_x - (arenaWidth / 2);
         _y = arenaHeight - _y;
         mouseY = (GLfloat)_y - (arenaHeight / 2);
@@ -158,7 +163,7 @@ void drag(int _x, int _y)
 }
 
 void mouse(int button, int state, int _x, int _y)
-{   
+{
     if (!FIM)
     {
         mouseX = (GLfloat)_x - (arenaWidth / 2);
@@ -209,7 +214,8 @@ void keyPress(unsigned char key, int x, int y)
         break;
     case 'r':
     case 'R':
-        if(FIM){
+        if (FIM)
+        {
             free(lutador1);
             free(lutador2);
             lutador1 = new Lutador(nome1, lut1x, lut1y, lut1cor, 0, lut1rCabeca, arenaWidth, arenaHeight);
@@ -236,8 +242,8 @@ void keyup(unsigned char key, int x, int y)
 }
 
 void renderScene(void)
-{   
-    glClear(GL_COLOR_BUFFER_BIT);
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     lutador1->Desenha();
     lutador2->Desenha();
     ImprimePlacar(-150, (arenaHeight / 2) - 20);
@@ -276,6 +282,7 @@ void init(void)
             -100, 100);                            //     Z
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glEnable(GL_DEPTH_TEST);
 
     lutador1->setOponente(lutador2);
     lutador2->setOponente(lutador1);
@@ -285,49 +292,50 @@ void init(void)
 
 void idle(void)
 {
-    if(!FIM){
+    if (!FIM)
+    {
         double inc = INC_KEYIDLE;
         long long diffTime;
-
-        // CONFIGURACAO DO SOCO DO BOOT;
-        int dSoco;
-        LadoSoco lSoco;
 
         //MOVIMENTO DO BOOT
         if (lutador2->ehBoot())
         {
             lutador2->moveBoot();
 
-            srand(timeMS());
-            lSoco = (LadoSoco)(rand() % 3);
+            if(dSocoBoot <= 0) { 
+                if (lSocoBoot == DIREITA)
+                {
+                    lSocoBoot = ESQUERDA;
+                }
+                else
+                {   
+                    lSocoBoot = DIREITA;
+                }
+                goBackSoco=true;
+            } else if (dSocoBoot > arenaHeight / 2)
+            {   
+                goBackSoco=false;
+            }
 
-            if (lSoco == TODOS)
-            {
-                lutador2->controleSoco(1, TODOS);
+            if(goBackSoco==true){ 
+                dSocoBoot+=VEL_SOCO_BOOT;
+            } else {
+                dSocoBoot-=VEL_SOCO_BOOT;
             }
-            else
-            {
-                srand(timeMS());
-                dSoco = rand() % ((int)arenaHeight * 2);
-                lutador2->controleSoco(dSoco, lSoco);
-            }
+            
+            lutador2->controleSoco(dSocoBoot, lSocoBoot);
         }
 
         // PONTUACAO DO LUTADOR 1
-        bool acerto = lutador1->acerto(lut1_acerto_ant);
-        if (acerto && lutador1->getSocoStatus())
+        if (lutador1->acerto(lut1_acerto_ant) && lutador1->getSocoStatus())
         {
             lutador1->addPontos(1);
         }
 
-
         // PONTUACAO DO BOOT
-        diffTime = timeMS() - tSocoBoot;
-        if (lutador2->acerto(lut2_acerto_ant) &&
-            lutador2->getSocoStatus() && diffTime > TIME_SOCO)
+        if (lutador2->acerto(lut2_acerto_ant) && lutador2->getSocoStatus())
         {
             lutador2->addPontos(1);
-            tSocoBoot = timeMS();
         }
 
         // CONTROLE DE TECLAS
@@ -438,12 +446,12 @@ int main(int argc, char *argv[])
     lutador2 = new Lutador(nome2, lut2x, lut2y, lut2cor, 90, lut2rCabeca, arenaWidth, arenaHeight);
 
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
     glutInitWindowSize(arenaWidth, arenaHeight);
     glutInitWindowPosition(150, 50);
     glutCreateWindow("Tranformations 2D");
-    
+
     glutDisplayFunc(renderScene);
     glutKeyboardFunc(keyPress);
     glutIdleFunc(idle);
@@ -453,6 +461,6 @@ int main(int argc, char *argv[])
 
     init();
     glutMainLoop();
-    
+
     return 0;
 }
