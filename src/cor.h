@@ -10,6 +10,7 @@ private:
     GLfloat R;
     GLfloat G;
     GLfloat B;
+    GLfloat *vCor;
 
 public:
     Cor(GLfloat r, GLfloat g, GLfloat b);
@@ -17,9 +18,8 @@ public:
     GLfloat getR();
     GLfloat getG();
     GLfloat getB();
-    void setR(GLfloat R);
-    void setG(GLfloat G);
-    void setB(GLfloat B);
+    void setRGB(GLfloat R, GLfloat G, GLfloat B);
+    GLfloat* Cor2Vetor();
 };
 
 #endif /* COR_H */

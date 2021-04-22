@@ -1,59 +1,60 @@
 #include "cor.h"
 
 Cor::Cor(GLfloat r, GLfloat g, GLfloat b)
-{
-    this->R = r;
-    this->G = g;
-    this->B = b;
+{   
+    vCor = (GLfloat*) malloc(sizeof(GLfloat)*4); 
+    R = vCor[0] = r;
+    G = vCor[1] = g;
+    B = vCor[2] = b;
+    vCor[3] = 1;
 }
+
 Cor::Cor(string nameCor)
 {
     if (nameCor == "red")
     {
-        this->R = 1;
-        this->G = 0;
-        this->B = 0;
+        R = 1;
+        G = 0;
+        B = 0;
     }
     else if (nameCor == "green")
     {
-        this->R = 0;
-        this->G = 1;
-        this->B = 0;
+        R = 0;
+        G = 1;
+        B = 0;
     }
     else if (nameCor == "blue")
     {
-        this->R = 0;
-        this->G = 0;
-        this->B = 1;
+        R = 0;
+        G = 0;
+        B = 1;
     } else {
-        this->R = 1;
-        this->G = 1;
-        this->B = 1;
+        R = 1;
+        G = 1;
+        B = 1;
     }
 }
 
 GLfloat Cor::getR()
 {
-    return this->R;
+    return R;
 };
 GLfloat Cor::getG()
 {
-    return this->G;
+    return G;
 };
 GLfloat Cor::getB()
 {
-    return this->B;
+    return B;
 };
 
-void Cor::setR(GLfloat r)
+void Cor::setRGB(GLfloat r, GLfloat g, GLfloat b)
 {
-    this->R = r;
+    R = vCor[0] = r;
+    G = vCor[1] = g;
+    B = vCor[2] = b;
 };
-void Cor::setG(GLfloat g)
-{
-    this->G = g;
-};
-void Cor::setB(GLfloat b)
-{
-    this->B = b;
-};
+
+GLfloat* Cor::Cor2Vetor(){ 
+    return vCor;
+}

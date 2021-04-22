@@ -243,7 +243,7 @@ void keyup(unsigned char key, int x, int y)
 
 void renderScene(void)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT );
     lutador1->Desenha();
     lutador2->Desenha();
     ImprimePlacar(-150, (arenaHeight / 2) - 20);
@@ -282,7 +282,6 @@ void init(void)
             -100, 100);                            //     Z
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glEnable(GL_DEPTH_TEST);
 
     lutador1->setOponente(lutador2);
     lutador2->setOponente(lutador1);
@@ -446,10 +445,10 @@ int main(int argc, char *argv[])
     lutador2 = new Lutador(nome2, lut2x, lut2y, lut2cor, 90, lut2rCabeca, arenaWidth, arenaHeight);
 
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB );
 
     glutInitWindowSize(arenaWidth, arenaHeight);
-    glutInitWindowPosition(150, 50);
+    glutInitWindowPosition(2000, 300);
     glutCreateWindow("Tranformations 2D");
 
     glutDisplayFunc(renderScene);
